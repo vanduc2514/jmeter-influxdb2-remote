@@ -1,0 +1,16 @@
+# JMeter plugin manager (https://jmeter-plugins.org/wiki/PluginsManager/)
+#
+# Pre-requisite: Download plugins-manager.jar (https://jmeter-plugins.org/get/) and put it into lib/ext directory, then restart JMeter.
+#
+# Install via command line (https://jmeter-plugins.org/install/Install/)
+# To use proxy with command line, please use JVM_ARGS environment variable to set proxy properties, like this:
+# JVM_ARGS="-Dhttps.proxyHost=myproxy.com -Dhttps.proxyPort=8080"
+# 
+# sample command
+# PluginsManagerCMD install jpgc-csvars=0.1,jpgc-functions,jpgc-redis,jmeter.backendlistener.azure
+
+# Error: could not find cmdrunner => copy "cmdrunner-2.2.jar" to your jmeter lib folder
+# Error: Could not find matching constructor for: redis.clients.jedis.Jedis(String, Integer, Boolean)
+# => replace your old jedis in lib folder by jedis-3.6.2.jar
+
+jpgc-csvars=0.1,jpgc-functions,jpgc-redis,jmeter.backendlistener.azure,jmeter-components,jpgc-casutg,jpgc-dummy,jpgc-prmctl
