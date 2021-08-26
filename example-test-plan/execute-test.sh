@@ -1,1 +1,1 @@
-jmeter -n -t Example-Apache-Jmeter-Plan.jmx -r
+jmeter -n -t -r Example-Apache-Jmeter-Plan.jmx
