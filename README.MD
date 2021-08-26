@@ -16,8 +16,7 @@ gradle fatJar
 
 ### Install in Jmeter
 
-These steps are done in both master and slave machine. Without those, the sample sender
-won't work.
+**Note**: These steps are done in both master and slave machine
 
 1. Copy the above artifact to `${JMETER_HOME}/lib/ext` 
 
