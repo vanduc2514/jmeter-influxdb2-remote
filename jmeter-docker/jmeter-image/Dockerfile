@@ -33,7 +33,7 @@ RUN bin/PluginsManagerCMD.sh install $(cat plugins.txt | grep ^[^#])
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 
-COPY jmeter.properties ./bin
+COPY user.properties ./bin
 
 EXPOSE 1099 50000 60000 8000
 

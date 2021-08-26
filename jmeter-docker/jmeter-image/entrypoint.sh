@@ -24,8 +24,5 @@
 
 # new setting
 CMD="export JVM_ARGS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000 && \
-		${JMETER_HOME}bin/jmeter-server \
-			  -Dserver.rmi.localport=50000 \
-			  -Dserver_port=1099 \
-			  -Jserver.rmi.ssl.disable=true"
+		  ${JMETER_HOME}bin/jmeter-server"
 eval "$CMD"
