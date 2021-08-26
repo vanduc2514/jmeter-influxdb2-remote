@@ -1,6 +1,3 @@
-[submodule "jmeter"]
-	path = jmeter
-	url = https://github.com/apache/jmeter.git
 [submodule "jmeter-influxdb2-listener-plugin"]
 	path = jmeter-influxdb2-listener-plugin
 	url = https://github.com/mderevyankoaqa/jmeter-influxdb2-listener-plugin.git
