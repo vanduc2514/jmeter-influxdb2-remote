@@ -8,7 +8,7 @@ the jmeter master in order to reduce the network workload
 
 ### Prepare the artifact
 
-Build the project with 
+Build the artifact with from `influxdb2-samplesender` 
 
 ```bash
 gradle fatJar
