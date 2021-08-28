@@ -1,103 +1,44 @@
-package org.ifisolution.measures;
+package org.ifisolution.measures.impl;
 
 import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
 import org.apache.jmeter.samplers.SampleEvent;
 import org.apache.jmeter.samplers.SampleResult;
-import org.ifisolution.influxdb.configuration.JmeterPropertiesProvider;
 import org.ifisolution.influxdb.InfluxClient;
 import org.ifisolution.influxdb.InfluxClientConfiguration;
+import org.ifisolution.influxdb.configuration.JmeterPropertiesProvider;
+import org.ifisolution.measures.InfluxTestResultMeasure;
 import org.ifisolution.measures.metrics.RequestMeasurement;
-import org.ifisolution.measures.metrics.TestStartEndMeasurement;
 import org.ifisolution.util.MeasureUtil;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implements InfluxTestResultMeasure {
 
-public class InfluxMeasureImpl implements InfluxMeasure {
-
-    private static InfluxMeasureImpl manager;
-
-    private final InfluxClient influxClient;
-
-    private String hostName;
-
-    private String testName;
-
-    private String runId;
+    private static InfluxTestResultMeasureImpl manager;
 
     private boolean saveErrorResponse;
 
-    private InfluxMeasureImpl(InfluxClient influxClient) {
-        this.influxClient = influxClient;
+    private InfluxTestResultMeasureImpl(InfluxClient influxClient) {
+        super(influxClient);
     }
 
     /**
      * Singleton Default Manager
      *
-     * @return the {@link InfluxMeasureImpl}
+     * @return the {@link InfluxTestResultMeasureImpl}
      */
-    public static InfluxMeasureImpl getInstance() {
+    public static InfluxTestResultMeasureImpl getInstance() {
         if (manager == null) {
             JmeterPropertiesProvider jmeterPropertiesProvider = new JmeterPropertiesProvider();
             InfluxClient influxClient = InfluxClient.buildClient(
                     new InfluxClientConfiguration(jmeterPropertiesProvider)
             );
-            manager = new InfluxMeasureImpl(influxClient);
-        }
-        try {
-            manager.hostName = InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e) {
-            manager.hostName = "Unknown Host";
+            manager = new InfluxTestResultMeasureImpl(influxClient);
         }
         return manager;
     }
 
     public void setSaveErrorResponse(boolean saveErrorResponse) {
         this.saveErrorResponse = saveErrorResponse;
-    }
-
-    public boolean isSaveErrorResponse() {
-        return saveErrorResponse;
-    }
-
-    public void setTestName(String testName) {
-        this.testName = testName;
-    }
-
-    public String getTestName() {
-        return testName;
-    }
-
-    public void setRunId(String runId) {
-        this.runId = runId;
-    }
-
-    public String getRunId() {
-        return runId;
-    }
-
-    @Override
-    public void writeStartState() {
-        Point point = Point.measurement(TestStartEndMeasurement.MEASUREMENT_NAME)
-                .time(MeasureUtil.getCurrentTimeMilliSecond(), WritePrecision.MS)
-                .addTag(TestStartEndMeasurement.Tags.TYPE, TestStartEndMeasurement.Values.STARTED)
-                .addTag(TestStartEndMeasurement.Tags.NODE_NAME, hostName)
-                .addTag(TestStartEndMeasurement.Tags.TEST_NAME, testName)
-                .addField(TestStartEndMeasurement.Fields.PLACEHOLDER, "1");
-        this.influxClient.writeInfluxPoint(point);
-    }
-
-    @Override
-    public void writeFinishState() {
-        Point point = Point.measurement(TestStartEndMeasurement.MEASUREMENT_NAME)
-                .time(MeasureUtil.getCurrentTimeMilliSecond(), WritePrecision.MS)
-                .addTag(TestStartEndMeasurement.Tags.TYPE, TestStartEndMeasurement.Values.FINISHED)
-                .addTag(TestStartEndMeasurement.Tags.NODE_NAME, hostName)
-                .addTag(TestStartEndMeasurement.Tags.TEST_NAME, testName)
-                .addTag(TestStartEndMeasurement.Tags.RUN_ID, runId)
-                .addField(TestStartEndMeasurement.Fields.PLACEHOLDER, "1");
-        this.influxClient.writeInfluxPoint(point);
     }
 
     @Override
@@ -156,7 +97,7 @@ public class InfluxMeasureImpl implements InfluxMeasure {
 
     @Override
     public void close() {
-        this.influxClient.closeClient();
+        super.close();
         manager = null;
     }
 

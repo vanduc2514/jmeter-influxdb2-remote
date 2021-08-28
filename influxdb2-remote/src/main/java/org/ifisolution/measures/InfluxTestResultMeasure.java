@@ -2,13 +2,11 @@ package org.ifisolution.measures;
 
 import org.apache.jmeter.samplers.SampleEvent;
 
-public interface InfluxMeasure {
-
-    void writeStartState();
-
-    void writeFinishState();
+public interface InfluxTestResultMeasure {
 
     void writeTestResult(SampleEvent sampleEvent);
+
+    void setSaveErrorResponse(boolean saveErrorResponse);
 
     void close();
 

@@ -18,8 +18,8 @@
 package org.ifisolution.samplers;
 
 import org.apache.jmeter.samplers.*;
-import org.ifisolution.measures.InfluxMeasureImpl;
-import org.ifisolution.measures.InfluxMeasure;
+import org.ifisolution.measures.impl.InfluxTestResultMeasureImpl;
+import org.ifisolution.measures.InfluxTestResultMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,27 +29,27 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InfluxSampleSender.class);
 
-    private final InfluxMeasure defaultManager;
+    private final InfluxTestResultMeasure defaultResultMeasure;
 
     /**
      * This constructor is invoked through reflection found in {@link SampleSenderFactory}
      */
     public InfluxSampleSender(RemoteSampleListener listener) {
         super(listener);
-        defaultManager = InfluxMeasureImpl.getInstance();
+        defaultResultMeasure = InfluxTestResultMeasureImpl.getInstance();
     }
 
     @Override
     public void testEnded(String host) {
-        if (defaultManager != null) {
-            defaultManager.close();
+        if (defaultResultMeasure != null) {
+            defaultResultMeasure.close();
         }
         LOGGER.info("Test ended on : " + host);
     }
 
     @Override
     public void sampleOccurred(SampleEvent e) {
-        defaultManager.writeTestResult(e);
+        defaultResultMeasure.writeTestResult(e);
         super.sampleOccurred(e);
 //        JMeterContextService.ThreadCounts tc = JMeterContextService.getThreadCounts();
 //        System.out.println("Started Thread: " + tc.startedThreads);

@@ -1,11 +1,11 @@
 package org.ifisolution.listeners;
 
 import org.apache.jmeter.testelement.TestStateListener;
-import org.ifisolution.measures.InfluxMeasureImpl;
+import org.ifisolution.measures.impl.InfluxTestResultMeasureImpl;
 
 public class InfluxTestStateListener implements TestStateListener {
 
-    private InfluxMeasureImpl influxManager;
+    private InfluxTestResultMeasureImpl influxManager;
 
     @Override
     public void testStarted() {
