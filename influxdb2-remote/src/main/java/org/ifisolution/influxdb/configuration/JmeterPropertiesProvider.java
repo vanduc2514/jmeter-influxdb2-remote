@@ -1,4 +1,4 @@
-package org.ifisolution.configuration;
+package org.ifisolution.influxdb.configuration;
 
 import org.apache.jmeter.util.JMeterUtils;
 

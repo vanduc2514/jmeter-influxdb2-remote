@@ -1,6 +1,6 @@
 package org.ifisolution.influxdb;
 
-import org.ifisolution.configuration.InfluxConfigurationProvider;
+import org.ifisolution.influxdb.configuration.InfluxConfigurationProvider;
 
 public class InfluxClientConfiguration {
 

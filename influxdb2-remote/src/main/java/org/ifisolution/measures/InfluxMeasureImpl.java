@@ -4,7 +4,7 @@ import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
 import org.apache.jmeter.samplers.SampleEvent;
 import org.apache.jmeter.samplers.SampleResult;
-import org.ifisolution.configuration.JmeterPropertiesProvider;
+import org.ifisolution.influxdb.configuration.JmeterPropertiesProvider;
 import org.ifisolution.influxdb.InfluxClient;
 import org.ifisolution.influxdb.InfluxClientConfiguration;
 import org.ifisolution.measures.metrics.RequestMeasurement;
