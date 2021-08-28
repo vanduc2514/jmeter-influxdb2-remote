@@ -18,39 +18,45 @@
 package org.ifisolution.samplers;
 
 import org.apache.jmeter.samplers.*;
-import org.apache.jmeter.threads.JMeterContextService;
-import org.apache.jmeter.util.JMeterUtils;
+import org.ifisolution.measures.InfluxMeasureImpl;
+import org.ifisolution.measures.InfluxMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 
-public class InfluxDB2SampleSender extends DataStrippingSampleSender implements Serializable, Runnable {
+public class InfluxSampleSender extends BatchSampleSender implements Serializable, Runnable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InfluxDB2SampleSender.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InfluxSampleSender.class);
 
-    public InfluxDB2SampleSender(RemoteSampleListener listener) {
-
-    }
+    private final InfluxMeasure defaultManager;
 
     /**
      * This constructor is invoked through reflection found in {@link SampleSenderFactory}
      */
-
+    public InfluxSampleSender(RemoteSampleListener listener) {
+        super(listener);
+        defaultManager = InfluxMeasureImpl.getInstance();
+    }
 
     @Override
     public void testEnded(String host) {
+        if (defaultManager != null) {
+            defaultManager.close();
+        }
         LOGGER.info("Test ended on : " + host);
     }
 
     @Override
     public void sampleOccurred(SampleEvent e) {
-        JMeterContextService.ThreadCounts tc = JMeterContextService.getThreadCounts();
-        System.out.println("Started Thread: " + tc.startedThreads);
-        System.out.println(tc.finishedThreads);
-        LOGGER.info("Sample Event occurred on " + InfluxDB2SampleSender.class.getName());
-
-        JMeterUtils.getPropDefault("influxdb_hostname", null);
+        defaultManager.writeTestResult(e);
+        super.sampleOccurred(e);
+//        JMeterContextService.ThreadCounts tc = JMeterContextService.getThreadCounts();
+//        System.out.println("Started Thread: " + tc.startedThreads);
+//        System.out.println(tc.finishedThreads);
+//        LOGGER.info("Sample Event occurred on " + InfluxDB2SampleSender.class.getName());
+//
+//        JMeterUtils.getPropDefault("influxdb_hostname", null);
     }
 
     @Override
