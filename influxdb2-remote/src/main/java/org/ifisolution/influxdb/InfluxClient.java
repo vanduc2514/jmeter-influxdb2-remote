@@ -34,12 +34,11 @@ public class InfluxClient {
      * Write values to influx Database
      * @param point the influxDb {@link Point} wrapper
      */
-    public void writeValues(Point point) {
+    public void writeInfluxPoint(Point point) {
         // Write by Data Point
         try (WriteApi writeApi = this.actualClient.getWriteApi()) {
             writeApi.writePoint(point);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LOGGER.error("Failed writing to influx", e);
         }
     }
