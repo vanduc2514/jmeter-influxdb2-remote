@@ -18,21 +18,25 @@
 package org.ifisolution.samplers;
 
 import org.apache.jmeter.samplers.*;
+import org.apache.jmeter.threads.JMeterContextService;
+import org.apache.jmeter.util.JMeterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 
-public class InfluxDB2SampleSender extends AbstractSampleSender implements Serializable {
+public class InfluxDB2SampleSender extends DataStrippingSampleSender implements Serializable, Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InfluxDB2SampleSender.class);
+
+    public InfluxDB2SampleSender(RemoteSampleListener listener) {
+
+    }
 
     /**
      * This constructor is invoked through reflection found in {@link SampleSenderFactory}
      */
-    InfluxDB2SampleSender(RemoteSampleListener listener) {
-        LOGGER.info("entering constructor with param: " + RemoteSampleListener.class.getName());
-    }
+
 
     @Override
     public void testEnded(String host) {
@@ -41,7 +45,16 @@ public class InfluxDB2SampleSender extends AbstractSampleSender implements Seria
 
     @Override
     public void sampleOccurred(SampleEvent e) {
+        JMeterContextService.ThreadCounts tc = JMeterContextService.getThreadCounts();
+        System.out.println("Started Thread: " + tc.startedThreads);
+        System.out.println(tc.finishedThreads);
         LOGGER.info("Sample Event occurred on " + InfluxDB2SampleSender.class.getName());
+
+        JMeterUtils.getPropDefault("influxdb_hostname", null);
     }
 
+    @Override
+    public void run() {
+        System.out.println("Running Job");
+    }
 }
