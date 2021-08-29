@@ -44,7 +44,6 @@ jar {
     manifest {
         attributes 'Implementation-Title': title,
                 'Implementation-Version': archiveVersion
-//                'Main-Class': 'org.ifisolution.samplers.InfluxDB2SampleSender'
     }
 }
 

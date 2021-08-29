@@ -49,10 +49,10 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
         String failureMessage = sampleResult.getFirstAssertionFailureMessage();
         boolean errorOccurred = failureMessage != null;
 
-        Point point = Point.measurement(RequestMeasurement.MEASUREMENT_NAME);
+        Point resultPoint = Point.measurement(RequestMeasurement.MEASUREMENT_NAME);
 
         if (errorOccurred) {
-            point.addTag(RequestMeasurement.Tags.ERROR_MSG, failureMessage);
+            resultPoint.addTag(RequestMeasurement.Tags.ERROR_MSG, failureMessage);
             if (saveErrorResponse) {
                 String errorBody = sampleResult.getResponseDataAsString();
                 if (errorBody != null && !errorBody.isEmpty()) {
@@ -60,11 +60,11 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
                 } else {
                     errorBody = "Error Body is empty";
                 }
-                point.addTag(RequestMeasurement.Tags.ERROR_RESPONSE_BODY, errorBody);
+                resultPoint.addTag(RequestMeasurement.Tags.ERROR_RESPONSE_BODY, errorBody);
             }
         }
 
-        point.time(MeasureUtil.getCurrentTimeNanoSecond(), WritePrecision.NS)
+        resultPoint.time(MeasureUtil.getCurrentTimeNanoSecond(), WritePrecision.NS)
                 .addTag(RequestMeasurement.Tags.TEST_NAME, testName)
                 .addTag(RequestMeasurement.Tags.RUN_ID, runId)
                 .addTag(RequestMeasurement.Tags.REQUEST_NAME, sampleResult.getSampleLabel())
@@ -79,7 +79,7 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
                 .addField(RequestMeasurement.Fields.CONNECT_TIME, connectTime)
                 .addField(RequestMeasurement.Fields.PROCESSING_TIME, latency - connectTime);
 
-        this.influxClient.writeInfluxPoint(point);
+        this.influxClient.writeInfluxPoint(resultPoint);
     }
 
     /**
