@@ -1,8 +1,7 @@
 # InfluxDB2 Sample Sender
 
-This is a customized jmeter SampleSender which allows a jmeter remote server (slave machine)
-to send each SampleResult directly to InfluxDb2 Database without transfer it back to
-the jmeter master in order to reduce the network workload
+This plugin allows a jmeter remote server (slave machine) to send each SampleResult 
+directly to InfluxDb2 Database
 
 ## Installation
 
@@ -14,18 +13,39 @@ Build the artifact from `influxdb2-samplesender`
 gradle fatJar
 ```
 
-### Install in Jmeter
+### Installation
 
 **Note**: These steps are done in both master and slave machine
 
 1. Copy the above artifact to `${JMETER_HOME}/lib/ext` 
 
-2. Add the following properties to `user.properties` from `${JMETER_HOME}/bin`
+2. Add these following properties to `user.properties` from `${JMETER_HOME}/bin`
+
+Switch to Influx Sample Sender mode
 
 ```properties
 mode=org.ifisolution.plugins.samplers.InfluxSampleSender
 ```
 
-or override the properties with `Jmode=org.ifisolution.plugins.samplers.InfluxSampleSender` from the CLI
+InfluxDb Connection Properties
+
+```properties
+influxdb.hostname=InfluxDb Host Name
+influxdb.port=InfluxDb Port
+influxdb.token=InfluxDd Access Token
+influxdb.organization=InfluxDb Organization
+influxdb.bucket=InfluxDb Bucket Name
+```
 
 3. Restart jmeter 
+
+### Usage
+
+This plugin comes with a `SampleSender` for sending Test Result directly to Influxdb 
+from the slave machine and a `BackendListenerClient` for monitoring the Thread users,
+Test start and end 
+
+To monitor the Thread users counts, please add the `InfluxTestStateListener` to 
+Backend Listener
+
+![jmeter]()
