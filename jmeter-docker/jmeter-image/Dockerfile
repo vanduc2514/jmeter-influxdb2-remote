@@ -29,6 +29,8 @@ RUN wget -O "lib/ext/jmeter-plugin-influxdb2-listener-1.1.jar" https://github.co
 COPY plugins.txt .
 RUN bin/PluginsManagerCMD.sh install $(cat plugins.txt | grep ^[^#])
 
+COPY jmeter-influxdb2-remote-0.9.jar ./lib/ext
+
 # Copy Jmeter entrypoint
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh

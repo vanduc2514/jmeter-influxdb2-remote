@@ -23,9 +23,9 @@ gradle fatJar
 2. Add the following properties to `user.properties` from `${JMETER_HOME}/bin`
 
 ```properties
-mode=org.ifisolution.samplers.InfluxSampleSender
+mode=org.ifisolution.plugins.samplers.InfluxSampleSender
 ```
 
-or override the properties with `Jmode=org.ifisolution.samplers.InfluxSampleSender` from the CLI
+or override the properties with `Jmode=org.ifisolution.plugins.samplers.InfluxSampleSender` from the CLI
 
 3. Restart jmeter 
