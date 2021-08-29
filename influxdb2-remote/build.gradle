@@ -3,8 +3,8 @@ apply plugin: 'eclipse'
 
 sourceCompatibility = 11
 version = '0.9'
-def title = 'JMeterInfluxDBSampleSender'
-def archiveName = 'jmeter-influxdb2-samplesender'
+def title = 'JMeterInfluxDBRemote'
+def archiveName = 'jmeter-influxdb2-remote'
 
 repositories {
     mavenCentral()

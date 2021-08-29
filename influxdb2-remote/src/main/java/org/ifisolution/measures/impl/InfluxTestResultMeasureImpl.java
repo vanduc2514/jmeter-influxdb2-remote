@@ -13,7 +13,7 @@ import org.ifisolution.util.MeasureUtil;
 
 public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implements InfluxTestResultMeasure {
 
-    private static InfluxTestResultMeasureImpl manager;
+    private static InfluxTestResultMeasureImpl measure;
 
     private boolean saveErrorResponse;
 
@@ -27,14 +27,14 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
      * @return the {@link InfluxTestResultMeasureImpl}
      */
     public static InfluxTestResultMeasureImpl getInstance() {
-        if (manager == null) {
+        if (measure == null) {
             JmeterPropertiesProvider jmeterPropertiesProvider = new JmeterPropertiesProvider();
             InfluxClient influxClient = InfluxClient.buildClient(
                     new InfluxClientConfiguration(jmeterPropertiesProvider)
             );
-            manager = new InfluxTestResultMeasureImpl(influxClient);
+            measure = new InfluxTestResultMeasureImpl(influxClient);
         }
-        return manager;
+        return measure;
     }
 
     public void setSaveErrorResponse(boolean saveErrorResponse) {
@@ -98,7 +98,7 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
     @Override
     public void close() {
         super.close();
-        manager = null;
+        measure = null;
     }
 
 }
