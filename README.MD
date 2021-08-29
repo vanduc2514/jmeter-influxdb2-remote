@@ -13,7 +13,7 @@ Build the artifact from `influxdb2-samplesender`
 gradle fatJar
 ```
 
-### Installation
+### Install to Jmeter
 
 **Note**: These steps are done in both master and slave machine
 
@@ -21,13 +21,13 @@ gradle fatJar
 
 2. Add these following properties to `user.properties` from `${JMETER_HOME}/bin`
 
-Switch to Influx Sample Sender mode
+- SamplerSender Properties
 
 ```properties
 mode=org.ifisolution.plugins.samplers.InfluxSampleSender
 ```
 
-InfluxDb Connection Properties
+- InfluxDb Connection Properties
 
 ```properties
 influxdb.hostname=InfluxDb Host Name
@@ -39,7 +39,7 @@ influxdb.bucket=InfluxDb Bucket Name
 
 3. Restart jmeter 
 
-### Usage
+## Usage
 
 This plugin comes with a `SampleSender` for sending Test Result directly to Influxdb 
 from the slave machine and a `BackendListenerClient` for monitoring the Thread users,
