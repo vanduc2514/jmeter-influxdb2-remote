@@ -23,20 +23,22 @@ import org.ifisolution.measures.InfluxTestResultMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 
 public class InfluxSampleSender extends BatchSampleSender implements Serializable, Runnable {
 
+    private static final long serialVersionUID = 3371144997364645511L;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(InfluxSampleSender.class);
 
-    private final InfluxTestResultMeasure defaultResultMeasure;
+    private InfluxTestResultMeasure defaultResultMeasure;
 
     /**
      * This constructor is invoked through reflection found in {@link SampleSenderFactory}
      */
     public InfluxSampleSender(RemoteSampleListener listener) {
         super(listener);
-        defaultResultMeasure = InfluxTestResultMeasureImpl.getInstance();
     }
 
     @Override
@@ -62,5 +64,14 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
     @Override
     public void run() {
         System.out.println("Running Job");
+    }
+
+    private Object readResolve() throws ObjectStreamException {
+        if (isClientConfigured()) {
+            defaultResultMeasure = InfluxTestResultMeasureImpl.getInstance();
+        } else {
+            defaultResultMeasure = InfluxTestResultMeasureImpl.getInstance();
+        }
+        return this;
     }
 }
