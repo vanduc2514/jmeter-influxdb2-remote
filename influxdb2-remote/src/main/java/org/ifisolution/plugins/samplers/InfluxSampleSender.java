@@ -15,18 +15,21 @@
  * limitations under the License.
  */
 
-package org.ifisolution.samplers;
+package org.ifisolution.plugins.samplers;
 
 import org.apache.jmeter.samplers.*;
-import org.ifisolution.measures.impl.InfluxTestResultMeasureImpl;
+import org.apache.jmeter.threads.JMeterContextService;
 import org.ifisolution.measures.InfluxTestResultMeasure;
+import org.ifisolution.measures.impl.AbstractInfluxMeasure;
+import org.ifisolution.measures.impl.InfluxTestResultMeasureImpl;
+import org.ifisolution.plugins.TestProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 
-public class InfluxSampleSender extends BatchSampleSender implements Serializable, Runnable {
+public class InfluxSampleSender extends BatchSampleSender implements Serializable {
 
     private static final long serialVersionUID = 3371144997364645511L;
 
@@ -45,32 +48,31 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
     public void testEnded(String host) {
         if (defaultResultMeasure != null) {
             defaultResultMeasure.close();
+            LOGGER.info("Influx Connection closed");
         }
-        LOGGER.info("Test ended on : " + host);
+        super.testEnded(host);
     }
 
     @Override
     public void sampleOccurred(SampleEvent e) {
         defaultResultMeasure.writeTestResult(e);
+        LOGGER.info("Wrote Test to Influx");
         super.sampleOccurred(e);
-//        JMeterContextService.ThreadCounts tc = JMeterContextService.getThreadCounts();
-//        System.out.println("Started Thread: " + tc.startedThreads);
-//        System.out.println(tc.finishedThreads);
-//        LOGGER.info("Sample Event occurred on " + InfluxDB2SampleSender.class.getName());
-//
-//        JMeterUtils.getPropDefault("influxdb_hostname", null);
     }
 
-    @Override
-    public void run() {
-        System.out.println("Running Job");
-    }
-
+    /**
+     * Internal method called by RMI. This method is invoked after this object is created
+     */
     private Object readResolve() throws ObjectStreamException {
-        if (isClientConfigured()) {
-            defaultResultMeasure = InfluxTestResultMeasureImpl.getInstance();
-        } else {
-            defaultResultMeasure = InfluxTestResultMeasureImpl.getInstance();
+        //Initialize a new measure
+        defaultResultMeasure = InfluxTestResultMeasureImpl.getInstance();
+        AbstractInfluxMeasure thisMeasure = (AbstractInfluxMeasure) defaultResultMeasure;
+        Sampler currentSampler = JMeterContextService.getContext().getCurrentSampler();
+        if (currentSampler != null) {
+            String testName = currentSampler.getPropertyAsString(TestProperties.TEST_NAME, "Test-Name");
+            String runId = currentSampler.getPropertyAsString(TestProperties.TEST_RUN_ID, "IFI-0000");
+            thisMeasure.setTestName(testName);
+            thisMeasure.setRunId(runId);
         }
         return this;
     }

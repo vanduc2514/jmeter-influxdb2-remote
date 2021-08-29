@@ -1,4 +1,4 @@
-package org.ifisolution.listeners;
+package org.ifisolution.plugins.listeners;
 
 import org.apache.jmeter.testelement.TestStateListener;
 import org.ifisolution.measures.impl.InfluxTestResultMeasureImpl;

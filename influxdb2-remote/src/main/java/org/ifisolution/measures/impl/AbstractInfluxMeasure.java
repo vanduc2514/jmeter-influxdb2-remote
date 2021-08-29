@@ -1,5 +1,6 @@
 package org.ifisolution.measures.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.ifisolution.influxdb.InfluxClient;
 
 import java.net.InetAddress;
@@ -7,11 +8,15 @@ import java.net.UnknownHostException;
 
 public abstract class AbstractInfluxMeasure {
 
+    public static final String UNKNOWN_HOST = "Unknown Host";
+
     protected String hostName;
 
-    protected String testName;
+    //Avoid NPE in Point
+    protected String testName = StringUtils.EMPTY;
 
-    protected String runId;
+    //Avoid NPE in Point
+    protected String runId = StringUtils.EMPTY;
 
     protected final InfluxClient influxClient;
 
@@ -19,7 +24,7 @@ public abstract class AbstractInfluxMeasure {
         try {
             hostName = InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException e) {
-            hostName = "Unknown Host";
+            hostName = UNKNOWN_HOST;
         }
         this.influxClient = influxClient;
     }
