@@ -17,12 +17,13 @@
 
 package org.ifisolution.plugins.samplers;
 
-import org.apache.jmeter.samplers.*;
-import org.apache.jmeter.threads.JMeterContextService;
+import org.apache.jmeter.samplers.BatchSampleSender;
+import org.apache.jmeter.samplers.RemoteSampleListener;
+import org.apache.jmeter.samplers.SampleEvent;
+import org.apache.jmeter.samplers.SampleSenderFactory;
 import org.ifisolution.measures.InfluxTestResultMeasure;
 import org.ifisolution.measures.impl.AbstractInfluxMeasure;
 import org.ifisolution.measures.impl.InfluxTestResultMeasureImpl;
-import org.ifisolution.plugins.TestProperties;
 import org.ifisolution.util.TestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
