@@ -48,4 +48,4 @@ Test start and end
 To monitor the Thread users counts, please add the `InfluxTestStateListener` to 
 Backend Listener
 
-![jmeter]()
+![jmeter](https://github.com/vanduc2514/jmeter-influxdb2-remote/raw/master/image/jmeter.png)
