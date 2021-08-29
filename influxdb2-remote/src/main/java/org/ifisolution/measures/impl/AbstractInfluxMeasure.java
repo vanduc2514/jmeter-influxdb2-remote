@@ -5,10 +5,14 @@ import org.ifisolution.influxdb.InfluxClient;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public abstract class AbstractInfluxMeasure {
 
     public static final String UNKNOWN_HOST = "Unknown Host";
+
+    public static final String DATE_PATTERN = "yyyy-MM-dd_HH:mm:ss";
 
     protected String hostName;
 
@@ -16,7 +20,7 @@ public abstract class AbstractInfluxMeasure {
     protected String testName = StringUtils.EMPTY;
 
     //Avoid NPE in Point
-    protected String runId = StringUtils.EMPTY;
+    protected String runId = getMeasureDateAsString();
 
     protected final InfluxClient influxClient;
 
@@ -47,6 +51,11 @@ public abstract class AbstractInfluxMeasure {
 
     public void close() {
         this.influxClient.closeClient();
+    }
+
+    private String getMeasureDateAsString() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_PATTERN);
+        return LocalDateTime.now().format(formatter);
     }
 
 }

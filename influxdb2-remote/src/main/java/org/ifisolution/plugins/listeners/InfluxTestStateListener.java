@@ -6,7 +6,6 @@ import org.apache.jmeter.visualizers.backend.BackendListenerContext;
 import org.ifisolution.measures.InfluxTestStateMeasure;
 import org.ifisolution.measures.impl.AbstractInfluxMeasure;
 import org.ifisolution.measures.impl.InfluxTestStateMeasureImpl;
-import org.ifisolution.util.TestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +28,6 @@ public class InfluxTestStateListener extends AbstractBackendListenerClient {
     public InfluxTestStateListener() {
         super();
         testStateMeasure = InfluxTestStateMeasureImpl.getInstance();
-        AbstractInfluxMeasure thisMeasure = (AbstractInfluxMeasure) testStateMeasure;
-        TestUtil.setTestMetaDataToMeasure(thisMeasure);
         scheduler = Executors.newScheduledThreadPool(SCHEDULER_THREAD_POOL_SIZE);
     }
 
