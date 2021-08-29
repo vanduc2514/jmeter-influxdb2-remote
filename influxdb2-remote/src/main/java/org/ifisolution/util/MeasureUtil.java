@@ -8,6 +8,9 @@ public class MeasureUtil {
 
     public static final int SCALE = 1000;
 
+    private MeasureUtil() {
+    }
+
     public static long getCurrentTimeMilliSecond() {
         return System.currentTimeMillis();
     }

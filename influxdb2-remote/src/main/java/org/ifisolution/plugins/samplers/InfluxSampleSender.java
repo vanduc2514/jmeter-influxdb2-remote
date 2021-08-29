@@ -23,6 +23,7 @@ import org.ifisolution.measures.InfluxTestResultMeasure;
 import org.ifisolution.measures.impl.AbstractInfluxMeasure;
 import org.ifisolution.measures.impl.InfluxTestResultMeasureImpl;
 import org.ifisolution.plugins.TestProperties;
+import org.ifisolution.util.TestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,13 +68,7 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
         //Initialize a new measure
         defaultResultMeasure = InfluxTestResultMeasureImpl.getInstance();
         AbstractInfluxMeasure thisMeasure = (AbstractInfluxMeasure) defaultResultMeasure;
-        Sampler currentSampler = JMeterContextService.getContext().getCurrentSampler();
-        if (currentSampler != null) {
-            String testName = currentSampler.getPropertyAsString(TestProperties.TEST_NAME, "Test-Name");
-            String runId = currentSampler.getPropertyAsString(TestProperties.TEST_RUN_ID, "IFI-0000");
-            thisMeasure.setTestName(testName);
-            thisMeasure.setRunId(runId);
-        }
+        TestUtil.setTestMetaDataToMeasure(thisMeasure);
         return this;
     }
 }
