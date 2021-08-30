@@ -21,8 +21,12 @@ import org.apache.jmeter.samplers.BatchSampleSender;
 import org.apache.jmeter.samplers.RemoteSampleListener;
 import org.apache.jmeter.samplers.SampleEvent;
 import org.apache.jmeter.samplers.SampleSenderFactory;
+import org.apache.jmeter.util.JMeterUtils;
+import org.ifisolution.configuration.JmeterTestProperties;
 import org.ifisolution.measures.InfluxTestResultMeasure;
+import org.ifisolution.measures.impl.AbstractInfluxMeasure;
 import org.ifisolution.measures.impl.InfluxTestResultMeasureImpl;
+import org.ifisolution.util.TestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +70,7 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
     private Object readResolve() throws ObjectStreamException {
         //Initialize a new measure
         defaultResultMeasure = InfluxTestResultMeasureImpl.getInstance();
+        TestUtil.setTestMetadata((AbstractInfluxMeasure) defaultResultMeasure);
         return this;
     }
 }
