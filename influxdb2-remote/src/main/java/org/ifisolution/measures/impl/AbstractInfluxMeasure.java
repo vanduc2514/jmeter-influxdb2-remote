@@ -13,14 +13,16 @@ public abstract class AbstractInfluxMeasure {
     public static final String UNKNOWN_HOST = "Unknown Host";
 
     public static final String DATE_PATTERN = "yyyy-MM-dd_HH:mm:ss";
+    public static final String DEFAULT_RUN_ID = "R001";
+    public static final String JMETER_TEST_PLAN_DEFAULT = "Jmeter_TestPlan_Default";
 
     protected String hostName;
 
     //Avoid NPE in Point
-    protected String testName = StringUtils.EMPTY;
+    protected String testName = JMETER_TEST_PLAN_DEFAULT;
 
     //Avoid NPE in Point
-    protected String runId = getMeasureDateAsString();
+    protected String runId = DEFAULT_RUN_ID;
 
     protected final InfluxClient influxClient;
 
