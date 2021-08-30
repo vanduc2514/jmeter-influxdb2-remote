@@ -6,7 +6,7 @@ import org.apache.jmeter.samplers.SampleEvent;
 import org.apache.jmeter.samplers.SampleResult;
 import org.ifisolution.influxdb.InfluxClient;
 import org.ifisolution.influxdb.InfluxClientConfiguration;
-import org.ifisolution.influxdb.configuration.JmeterPropertiesProvider;
+import org.ifisolution.configuration.InfluxPropertiesProvider;
 import org.ifisolution.measures.InfluxTestResultMeasure;
 import org.ifisolution.measures.metrics.RequestMeasurement;
 import org.ifisolution.util.MeasureUtil;
@@ -28,7 +28,7 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
      */
     public static InfluxTestResultMeasureImpl getInstance() {
         if (measure == null) {
-            JmeterPropertiesProvider jmeterPropertiesProvider = new JmeterPropertiesProvider();
+            InfluxPropertiesProvider jmeterPropertiesProvider = new InfluxPropertiesProvider();
             InfluxClient influxClient = InfluxClient.buildClient(
                     new InfluxClientConfiguration(jmeterPropertiesProvider)
             );

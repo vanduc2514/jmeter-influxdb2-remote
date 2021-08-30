@@ -1,6 +1,6 @@
-package org.ifisolution.influxdb.configuration;
+package org.ifisolution.configuration;
 
-public interface JmeterProperties {
+public interface JmeterInfluxProperties {
 
     String INFLUX_HOSTNAME = "influxdb.hostname";
 

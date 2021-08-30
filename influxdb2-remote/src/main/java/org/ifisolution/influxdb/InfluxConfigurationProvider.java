@@ -1,4 +1,4 @@
-package org.ifisolution.influxdb.configuration;
+package org.ifisolution.influxdb;
 
 public interface InfluxConfigurationProvider {
 

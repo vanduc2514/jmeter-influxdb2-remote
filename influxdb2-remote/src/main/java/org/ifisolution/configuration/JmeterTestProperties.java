@@ -1,6 +1,6 @@
-package org.ifisolution.plugins;
+package org.ifisolution.configuration;
 
-public interface TestProperties {
+public interface JmeterTestProperties {
 
     String TEST_NAME = "test.name";
 

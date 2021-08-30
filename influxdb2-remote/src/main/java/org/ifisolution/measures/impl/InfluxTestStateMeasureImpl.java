@@ -6,7 +6,7 @@ import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.visualizers.backend.UserMetric;
 import org.ifisolution.influxdb.InfluxClient;
 import org.ifisolution.influxdb.InfluxClientConfiguration;
-import org.ifisolution.influxdb.configuration.JmeterPropertiesProvider;
+import org.ifisolution.configuration.InfluxPropertiesProvider;
 import org.ifisolution.measures.InfluxTestStateMeasure;
 import org.ifisolution.measures.metrics.TestStartEndMeasurement;
 import org.ifisolution.measures.metrics.VirtualUsersMeasurement;
@@ -18,7 +18,7 @@ public class InfluxTestStateMeasureImpl extends AbstractInfluxMeasure implements
 
     public static InfluxTestStateMeasureImpl getInstance() {
         if (measure == null) {
-            JmeterPropertiesProvider jmeterPropertiesProvider = new JmeterPropertiesProvider();
+            InfluxPropertiesProvider jmeterPropertiesProvider = new InfluxPropertiesProvider();
             InfluxClient influxClient = InfluxClient.buildClient(
                     new InfluxClientConfiguration(jmeterPropertiesProvider)
             );
