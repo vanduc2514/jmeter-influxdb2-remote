@@ -18,6 +18,9 @@ Install the plugin to `${JMETER_HOME}/lib/ext`
 
 ## Configuration
 
+> Make sure to enable [distributed testing](https://jmeter.apache.org/usermanual/jmeter_distributed_testing_step_by_step.html)
+> before continuing 
+
 ```properties
 # Influx properties
 # The host name of Influx Database, whether it is a resolved name or an Ip address
@@ -71,7 +74,7 @@ to this [Jmeter User Manual](https://jmeter.apache.org/usermanual/get-started.ht
 For example:
 
 ```shell
-jmeter -n -t Test-Plan.jmx -G influx.properties -q influx.properties -r
+jmeter -n -t Example-Apache-Jmeter-Plan.jmx -G influx.properties -q influx.properties -r
 
 ```
 
