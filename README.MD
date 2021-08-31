@@ -88,8 +88,8 @@ and for the master machine then restart Jmeter. After that, execute the test nor
 ## Usage
 
 This plugin comes with a `InfluxSampleSender` for sending Test Result directly to Influxdb from the slave machine 
-and a BackendListenerClient for monitoring the Virtual users, Test start and Test end. To do so, select the 
-`InfluxTestStateListener` to Backend Listener implementation from the drop-down list.
+and a BackendListenerClient for monitoring the Virtual users, Test start and Test end from the master machine. 
+To do so, select the `InfluxTestStateListener` for Backend Listener implementation from the drop-down list.
 
 ![jmeter](https://github.com/vanduc2514/jmeter-influxdb2-remote/raw/master/image/jmeter.png)
 
