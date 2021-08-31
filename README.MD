@@ -67,7 +67,7 @@ This plugin can be configured from the master machine or configured on master an
 
 Create a new `.properties` file with the above properties and execute the test plan from the master machine with
 `-q path_to_created_property_file` and `-G path_to_created_property_file` option. For more information, refers
-to this [Jmeter User Manual](https://jmeter.apache.org/usermanual/get-started.html#override).
+to [Override Jmeter Properties](https://jmeter.apache.org/usermanual/get-started.html#override).
 
 For example:
 
@@ -76,7 +76,7 @@ jmeter -n -t Example-Apache-Jmeter-Plan.jmx -G influx.properties -q influx.prope
 
 ```
 
-> The properties should be the same one, which applies the configuration for both slave and master machine
+> Properties file should be the same. This file will apply the configuration for both master and slave machine(s)
 
 ### Or Configure on each machine
 
