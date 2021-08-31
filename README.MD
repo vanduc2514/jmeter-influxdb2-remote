@@ -2,8 +2,8 @@
 
 Jmeter has a [sender mode](https://jmeter.apache.org/usermanual/remote-test.html#sendermode) which allows loading 
 customized SampleSender. This plugin makes use of that feature and enables the Jmeter remote server (slave machine) 
-to send the Test Result directly to Influx Database, which provides real-time test data. After sending to Influx, 
-Test Result will be sent to the master machine using Batch Mode.
+to send the Test Result directly to Influx Database, in order to provide real-time test data. After sending to Influx, 
+Test Result will be sent back to the master machine using Batch Mode.
 
 ![jmeter_remote](https://github.com/vanduc2514/jmeter-influxdb2-remote/raw/master/image/jmeter_slave.png)
 
@@ -12,40 +12,38 @@ Since each slave machine is a client connects to Influx and constantly push data
 
 ## Installation
 
-Install the plugin to `${JMETER_HOME}/lib/ext` 
-
-> This plugin has to be installed on both master and slave machine in order to work properly
+Install the plugin to `${JMETER_HOME}/lib/ext` on master and each slave machine
 
 ## Configuration
 
 > Make sure to enable [distributed testing](https://jmeter.apache.org/usermanual/jmeter_distributed_testing_step_by_step.html)
-> before continuing 
+> before continue
 
 ```properties
 # Influx properties
-# The host name of Influx Database, whether it is a resolved name or an Ip address
+# The host name of Influx database, whether it is a resolved name or an Ip address
 # Example: localhost
 influxdb.hostname=
 
 # Influx properties
-# The port of Influx Database
+# The port of Influx database
 # Example: 8086
 influxdb.port=
 
 # Influx properties
-# The token of bucket from Influx Database, raw string generated from Influx Database
+# Raw bucket token string generated from Influx
 influxdb.token=
 
 # Influx properties
-# The organization name of Influx Database
+# The organization name of Influx database
 influxdb.organization=
 
 # Influx properties
-# The bucket name from Influx Database
+# The bucket name from Influx database
 influxdb.bucket=
 
 # Influx properties
-# Enable ssl (https) for connection to Influx Database
+# Enable ssl (https) for connection to Influx
 # Setting this to blank or ignore it will use the default http connection
 influxdb.ssl.enable=
 
@@ -63,7 +61,7 @@ test.runId=
 mode=org.ifisolution.plugins.samplers.InfluxSampleSender
 ```
 
-This plugin can be configured from the master machine or configured on each machine
+This plugin can be configured from the master machine or configured on master and each slave machine
 
 ### Configure from the master machine
 
@@ -82,13 +80,13 @@ jmeter -n -t Example-Apache-Jmeter-Plan.jmx -G influx.properties -q influx.prope
 
 ### Or Configure on each machine
 
-Add the above properties to `user.properties` (found in `${JMETER_HOME}/bin`) for each slave machine
-and for the master machine then restart Jmeter. After that, execute the test normally.
+Add the above properties to `user.properties` (found in `${JMETER_HOME}/bin`) for master and each slave machine
+then restart Jmeter.
 
 ## Usage
 
 This plugin comes with a `InfluxSampleSender` for sending Test Result directly to Influxdb from the slave machine 
-and a BackendListenerClient for monitoring the Virtual users, Test start and Test end from the master machine. 
+and a BackendListenerClient for monitoring the Virtual users, Test-start and Test-end from the master machine. 
 To do so, select the `InfluxTestStateListener` for Backend Listener implementation from the drop-down list.
 
 ![jmeter](https://github.com/vanduc2514/jmeter-influxdb2-remote/raw/master/image/jmeter.png)
@@ -99,6 +97,6 @@ After that, execute the test then verify it in Influx.
 
 ..._To be update_
 
-Thanks [@mderevyankoaqa](https://github.com/mderevyankoaqa) for developing the
+Thanks [@mderevyankoaqa](https://github.com/mderevyankoaqa), the author of
 [jmeter-influxdb2-listener-plugin](https://github.com/mderevyankoaqa/jmeter-influxdb2-listener-plugin),
-which inspired me for developing this 😁.
+you inspired me developing this.
