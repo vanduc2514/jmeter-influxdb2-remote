@@ -25,19 +25,17 @@ RUN wget -O "lib/cmdrunner-2.2.jar" https://repo1.maven.org/maven2/kg/apc/cmdrun
     java -cp lib/ext/jmeter-plugins-manager-1.6.jar org.jmeterplugins.repository.PluginManagerCMDInstaller
 
 # Install required plugins
-RUN wget -O "lib/ext/jmeter-plugin-influxdb2-listener-1.1.jar" https://github.com/mderevyankoaqa/jmeter-influxdb2-listener-plugin/releases/download/v1.1/jmeter-plugin-influxdb2-listener-1.1.jar
+RUN wget -O "lib/ext/jmeter-influxdb2-remote-1.0.jar" https://github.com/vanduc2514/jmeter-influxdb2-remote/releases/download/v1.0/jmeter-influxdb2-remote-1.0.jar
 COPY plugins.txt .
 RUN bin/PluginsManagerCMD.sh install $(cat plugins.txt | grep ^[^#])
 
-COPY jmeter-influxdb2-remote-1.0.jar ./lib/ext
+# Enable debug
+ENV JVM_ARGS -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000
 
-# Copy Jmeter entrypoint
-COPY entrypoint.sh /
-RUN chmod +x /entrypoint.sh
-
+# Enable the jmeter-slave for remote testing
 COPY user.properties ./bin
 
 EXPOSE 1099 50000 60000 8000
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT jmeter-server
 
