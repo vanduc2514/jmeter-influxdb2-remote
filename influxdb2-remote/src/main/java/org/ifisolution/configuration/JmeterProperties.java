@@ -1,21 +1,23 @@
 package org.ifisolution.configuration;
 
-public interface JmeterProperties {
+public enum JmeterProperties {
+    INFLUX_HOSTNAME("influxdb.hostname"),
+    INFLUX_PORT("influxdb.port"),
+    INFLUX_TOKEN("influxdb.token"),
+    INFLUX_ORGANIZATION("influxdb.organization"),
+    INFLUX_BUCKET("influxdb.bucket"),
+    INFLUX_SSL_ENABLE("influxdb.ssl.enable"),
+    TEST_NAME("test.name"),
+    TEST_RUN_ID("test.runId");
 
-    String INFLUX_HOSTNAME = "influxdb.hostname";
+    private final String key;
 
-    String INFLUX_PORT = "influxdb.port";
+    JmeterProperties(String name) {
+        this.key = name;
+    }
 
-    String INFLUX_SSL_ENABLE = "influxdb.ssl.enable";
-
-    String INFLUX_TOKEN = "influxdb.token";
-
-    String INFLUX_ORGANIZATION = "influxdb.organization";
-
-    String INFLUX_BUCKET_NAME = "influxdb.bucket";
-
-    String TEST_NAME = "test.name";
-
-    String TEST_RUN_ID = "test.runId";
+    public String key() {
+        return key;
+    }
 
 }

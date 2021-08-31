@@ -4,6 +4,8 @@ import org.apache.jmeter.util.JMeterUtils;
 import org.ifisolution.influxdb.InfluxConfigurationProvider;
 import org.ifisolution.measures.impl.MeasureConfigurationProvider;
 
+import static org.ifisolution.configuration.JmeterProperties.*;
+
 public class InfluxPropertiesProvider implements InfluxConfigurationProvider, MeasureConfigurationProvider {
 
     public static final String DEFAULT_TEST_NAME = "Jmeter_TestPlan_Default";
@@ -12,9 +14,9 @@ public class InfluxPropertiesProvider implements InfluxConfigurationProvider, Me
     @Override
     public String provideConnectionUrl() {
         final var builder = new StringBuilder();
-        var enableSSL = Boolean.parseBoolean(JMeterUtils.getProperty(JmeterProperties.INFLUX_SSL_ENABLE));
-        var hostName = JMeterUtils.getProperty(JmeterProperties.INFLUX_HOSTNAME);
-        var port = JMeterUtils.getProperty(JmeterProperties.INFLUX_PORT);
+        boolean enableSSL = Boolean.parseBoolean(JMeterUtils.getProperty(INFLUX_SSL_ENABLE.key()));
+        String hostName = JMeterUtils.getProperty(INFLUX_HOSTNAME.key());
+        String port = JMeterUtils.getProperty(INFLUX_PORT.key());
 
         if (enableSSL) {
             builder.append("https");
@@ -31,27 +33,27 @@ public class InfluxPropertiesProvider implements InfluxConfigurationProvider, Me
 
     @Override
     public String provideToken() {
-        return JMeterUtils.getProperty(JmeterProperties.INFLUX_TOKEN);
+        return JMeterUtils.getProperty(INFLUX_TOKEN.key());
     }
 
     @Override
     public String provideOrganizationName() {
-        return JMeterUtils.getProperty(JmeterProperties.INFLUX_ORGANIZATION);
+        return JMeterUtils.getProperty(INFLUX_ORGANIZATION.key());
     }
 
     @Override
     public String provideBucketName() {
-        return JMeterUtils.getProperty(JmeterProperties.INFLUX_BUCKET_NAME);
+        return JMeterUtils.getProperty(INFLUX_BUCKET.key());
     }
 
     @Override
     public String provideTestName() {
-        return JMeterUtils.getPropDefault(JmeterProperties.TEST_NAME, DEFAULT_TEST_NAME);
+        return JMeterUtils.getPropDefault(TEST_NAME.key(), DEFAULT_TEST_NAME);
     }
 
     @Override
     public String provideRunId() {
-        return JMeterUtils.getPropDefault(JmeterProperties.TEST_RUN_ID, DEFAULT_RUN_ID);
+        return JMeterUtils.getPropDefault(TEST_RUN_ID.key(), DEFAULT_RUN_ID);
     }
 
     @Override
