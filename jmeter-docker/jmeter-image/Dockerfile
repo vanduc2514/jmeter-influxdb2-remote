@@ -35,6 +35,8 @@ COPY jmeter-influxdb2-remote-1.0.jar ./lib/ext
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 
+COPY user.properties ./bin
+
 EXPOSE 1099 50000 60000 8000
 
 ENTRYPOINT ["/entrypoint.sh"]
