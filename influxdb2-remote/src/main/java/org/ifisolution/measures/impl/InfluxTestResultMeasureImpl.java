@@ -4,9 +4,9 @@ import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
 import org.apache.jmeter.samplers.SampleEvent;
 import org.apache.jmeter.samplers.SampleResult;
+import org.ifisolution.configuration.InfluxPropertiesProvider;
 import org.ifisolution.influxdb.InfluxClient;
 import org.ifisolution.influxdb.InfluxClientConfiguration;
-import org.ifisolution.configuration.InfluxPropertiesProvider;
 import org.ifisolution.measures.InfluxTestResultMeasure;
 import org.ifisolution.measures.metrics.RequestMeasurement;
 import org.ifisolution.util.MeasureUtil;
@@ -17,8 +17,9 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
 
     private boolean saveErrorResponse;
 
-    private InfluxTestResultMeasureImpl(InfluxClient influxClient) {
-        super(influxClient);
+    private InfluxTestResultMeasureImpl(InfluxClient influxClient,
+                                        MeasureConfigurationProvider configurationProvider) {
+        super(influxClient, configurationProvider);
     }
 
     /**
@@ -32,7 +33,7 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
             InfluxClient influxClient = InfluxClient.buildClient(
                     new InfluxClientConfiguration(jmeterPropertiesProvider)
             );
-            measure = new InfluxTestResultMeasureImpl(influxClient);
+            measure = new InfluxTestResultMeasureImpl(influxClient, jmeterPropertiesProvider);
         }
         return measure;
     }

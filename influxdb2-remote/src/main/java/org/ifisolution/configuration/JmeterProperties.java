@@ -1,6 +1,6 @@
 package org.ifisolution.configuration;
 
-public interface JmeterInfluxProperties {
+public interface JmeterProperties {
 
     String INFLUX_HOSTNAME = "influxdb.hostname";
 
@@ -13,5 +13,9 @@ public interface JmeterInfluxProperties {
     String INFLUX_ORGANIZATION = "influxdb.organization";
 
     String INFLUX_BUCKET_NAME = "influxdb.bucket";
+
+    String TEST_NAME = "test.name";
+
+    String TEST_RUN_ID = "test.runId";
 
 }
