@@ -7,7 +7,7 @@ Test Result will be sent to the master machine using Batch Mode.
 
 ![jmeter_remote](https://github.com/vanduc2514/jmeter-influxdb2-remote/raw/master/image/jmeter_slave.png)
 
-> **Notice:** This plugin will overload the Influx Database if there are a lot of slave machines run in parallel.
+**Notice:** This plugin will overload the Influx Database if there are a lot of slave machines run in parallel.
 Since each slave machine is a client connects to Influx and constantly push data to it
 
 ## Installation
