@@ -37,6 +37,8 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
 
     private InfluxTestResultMeasure defaultResultMeasure;
 
+    private boolean measureConfigured;
+
     /**
      * This constructor is invoked through reflection found in {@link SampleSenderFactory}
      */
@@ -55,6 +57,11 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
 
     @Override
     public void sampleOccurred(SampleEvent e) {
+        //Make sure the Influxdb measure is created only once when first sample event occurred
+        if (!measureConfigured) {
+            defaultResultMeasure = InfluxTestResultMeasureImpl.getInstance();
+            measureConfigured = true;
+        }
         defaultResultMeasure.writeTestResult(e);
         LOGGER.info("Wrote Test to Influx");
         super.sampleOccurred(e);
@@ -65,7 +72,7 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
      */
     private Object readResolve() throws ObjectStreamException {
         //Initialize a new measure
-        defaultResultMeasure = InfluxTestResultMeasureImpl.getInstance();
+        LOGGER.info("Use server configured for this run: " + isClientConfigured());
         return this;
     }
 }
