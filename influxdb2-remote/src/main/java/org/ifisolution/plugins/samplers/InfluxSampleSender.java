@@ -35,9 +35,7 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InfluxSampleSender.class);
 
-    private InfluxTestResultMeasure defaultResultMeasure;
-
-    private boolean measureConfigured;
+    private InfluxTestResultMeasure influxResultMeasure;
 
     /**
      * This constructor is invoked through reflection found in {@link SampleSenderFactory}
@@ -48,31 +46,30 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
 
     @Override
     public void testEnded(String host) {
-        if (defaultResultMeasure != null) {
-            defaultResultMeasure.close();
-            LOGGER.info("Influx Connection closed");
+        if (influxResultMeasure != null) {
+            influxResultMeasure.close();
         }
         super.testEnded(host);
     }
 
     @Override
     public void sampleOccurred(SampleEvent e) {
-        //Make sure the Influxdb measure is created only once when first sample event occurred
-        if (!measureConfigured) {
-            defaultResultMeasure = InfluxTestResultMeasureImpl.getInstance();
-            measureConfigured = true;
-        }
-        defaultResultMeasure.writeTestResult(e);
-        LOGGER.info("Wrote Test to Influx");
+        // Since the Jmeter properties sent from master is propagated at this point,
+        // This is the work-around solution so far to create Influx client using the master
+        // properties
+        influxResultMeasure.configureMeasureIdempotent();
+        influxResultMeasure.writeTestResult(e);
         super.sampleOccurred(e);
     }
 
     /**
-     * Internal method called by RMI. This method is invoked after this object is created
+     * Internal method called by RMI. This method acts as testStart()
      */
     private Object readResolve() throws ObjectStreamException {
-        //Initialize a new measure
-        LOGGER.info("Use server configured for this run: " + isClientConfigured());
+        // Initialize a new measure and lock
+        // Since this method is called by RMI, other Jmeter configuration is not provided yet
+        influxResultMeasure = InfluxTestResultMeasureImpl.getInstance();
         return this;
     }
+
 }

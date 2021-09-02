@@ -10,16 +10,27 @@ import org.ifisolution.influxdb.InfluxClientConfiguration;
 import org.ifisolution.measures.InfluxTestResultMeasure;
 import org.ifisolution.measures.metrics.RequestMeasurement;
 import org.ifisolution.util.MeasureUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implements InfluxTestResultMeasure {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(InfluxTestResultMeasureImpl.class);
+
     private static InfluxTestResultMeasureImpl measure;
+
+    private AtomicBoolean clientConfigured;
+
+    private CountDownLatch clientConfigureLatch;
+
+    private AtomicBoolean isClientClosed;
 
     private boolean saveErrorResponse;
 
-    private InfluxTestResultMeasureImpl(InfluxClient influxClient,
-                                        MeasureConfigurationProvider configurationProvider) {
-        super(influxClient, configurationProvider);
+    private InfluxTestResultMeasureImpl() {
     }
 
     /**
@@ -27,15 +38,37 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
      *
      * @return the {@link InfluxTestResultMeasureImpl}
      */
-    public static InfluxTestResultMeasureImpl getInstance() {
+    public static synchronized InfluxTestResultMeasureImpl getInstance() {
         if (measure == null) {
-            InfluxPropertiesProvider jmeterPropertiesProvider = new InfluxPropertiesProvider();
-            InfluxClient influxClient = InfluxClient.buildClient(
-                    new InfluxClientConfiguration(jmeterPropertiesProvider)
-            );
-            measure = new InfluxTestResultMeasureImpl(influxClient, jmeterPropertiesProvider);
+            measure = new InfluxTestResultMeasureImpl();
+            measure.clientConfigured = new AtomicBoolean(false);
+            measure.clientConfigureLatch = new CountDownLatch(1);
         }
         return measure;
+    }
+
+    public void configureMeasureIdempotent() {
+        if (!clientConfigured.getAndSet(true)) {
+            // Idempotent operation
+            InfluxPropertiesProvider propertiesProvider = new InfluxPropertiesProvider();
+            influxClient = InfluxClient.buildClient(new InfluxClientConfiguration(propertiesProvider));
+            testName = propertiesProvider.provideTestName();
+            runId = propertiesProvider.provideRunId();
+            hostName = propertiesProvider.provideHostName();
+            isClientClosed = new AtomicBoolean(false);
+            final var MESSAGE = "Configured Influx Test Result Client";
+            LOGGER.info(MESSAGE);
+            System.out.println(MESSAGE);
+            clientConfigureLatch.countDown();
+        } else {
+            try {
+                // Block other threads until the idempotent operation finish
+                // Will return immediately if the influx client is configured.
+                clientConfigureLatch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void setSaveErrorResponse(boolean saveErrorResponse) {
@@ -96,10 +129,17 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
                 .replace("=", "=\\ ");
     }
 
+    /**
+     * Make this method Thread safe
+     */
     @Override
     public void close() {
-        super.close();
-        measure = null;
+        if (!isClientClosed.getAndSet(true)) {
+            super.close();
+            measure = null;
+            final var MESSAGE = "Influx client closed, Measure singleton reset";
+            LOGGER.info(MESSAGE);
+            System.out.println(MESSAGE);
+        }
     }
-
 }

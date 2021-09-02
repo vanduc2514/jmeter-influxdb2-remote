@@ -12,7 +12,10 @@ public abstract class AbstractInfluxMeasure {
     //Avoid NPE in Point
     protected String runId;
 
-    protected final InfluxClient influxClient;
+    protected InfluxClient influxClient;
+
+    protected AbstractInfluxMeasure() {
+    }
 
     public AbstractInfluxMeasure(InfluxClient influxClient,
                                  MeasureConfigurationProvider configurationProvider) {
@@ -20,22 +23,6 @@ public abstract class AbstractInfluxMeasure {
         hostName = configurationProvider.provideHostName();
         testName = configurationProvider.provideTestName();
         runId = configurationProvider.provideRunId();
-    }
-
-    public void setTestName(String testName) {
-        this.testName = testName;
-    }
-
-    public String getTestName() {
-        return testName;
-    }
-
-    public void setRunId(String runId) {
-        this.runId = runId;
-    }
-
-    public String getRunId() {
-        return runId;
     }
 
     public void close() {
