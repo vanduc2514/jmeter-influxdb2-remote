@@ -3,7 +3,9 @@ package org.ifisolution.influxdb;
 import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.InfluxDBClientFactory;
 import com.influxdb.client.WriteApi;
+import com.influxdb.client.domain.HealthCheck;
 import com.influxdb.client.write.Point;
+import com.influxdb.exceptions.InfluxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,11 +15,14 @@ public class InfluxClient {
 
     private final InfluxDBClient actualClient;
 
+    private final WriteApi singletonWriteApi;
+
     /**
      * Use factory method {@link #buildClient(InfluxClientConfiguration)}
      */
     private InfluxClient(InfluxDBClient actualClient) {
         this.actualClient = actualClient;
+        this.singletonWriteApi = actualClient.makeWriteApi();
     }
 
     public static InfluxClient buildClient(InfluxClientConfiguration clientConfiguration) {
@@ -27,6 +32,12 @@ public class InfluxClient {
                 clientConfiguration.getOrganization(),
                 clientConfiguration.getBucketName()
         );
+        HealthCheck health = influxDBClient.health();
+        HealthCheck.StatusEnum healthStatus = health.getStatus();
+        System.out.println("Influx Status: " + healthStatus);
+        if (healthStatus == HealthCheck.StatusEnum.FAIL) {
+            System.out.println(health.getMessage());
+        }
         return new InfluxClient(influxDBClient);
     }
 
@@ -34,12 +45,12 @@ public class InfluxClient {
      * Write values to influx Database
      * @param point the influxDb {@link Point} wrapper
      */
-    public void writeInfluxPoint(Point point) {
+    public void writeInfluxPoint(Point point) throws InfluxException {
         // Write by Data Point
-        try (WriteApi writeApi = this.actualClient.getWriteApi()) {
-            writeApi.writePoint(point);
-        } catch (Exception e) {
-            LOGGER.error("Failed writing to influx", e);
+        try {
+            singletonWriteApi.writePoint(point);
+        } catch (InfluxException e) {
+            e.printStackTrace();
         }
     }
 
