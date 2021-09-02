@@ -4,9 +4,6 @@ import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
 import org.apache.jmeter.samplers.SampleEvent;
 import org.apache.jmeter.samplers.SampleResult;
-import org.ifisolution.configuration.InfluxPropertiesProvider;
-import org.ifisolution.influxdb.InfluxClient;
-import org.ifisolution.influxdb.InfluxClientConfiguration;
 import org.ifisolution.measures.InfluxTestResultMeasure;
 import org.ifisolution.measures.metrics.RequestMeasurement;
 import org.ifisolution.util.MeasureUtil;
@@ -17,9 +14,7 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
 
     private boolean saveErrorResponse;
 
-    private InfluxTestResultMeasureImpl(InfluxClient influxClient,
-                                        MeasureConfigurationProvider configurationProvider) {
-        super(influxClient, configurationProvider);
+    private InfluxTestResultMeasureImpl() {
     }
 
     /**
@@ -27,13 +22,9 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
      *
      * @return the {@link InfluxTestResultMeasureImpl}
      */
-    public static InfluxTestResultMeasureImpl getInstance() {
+    public static synchronized InfluxTestResultMeasureImpl getInstance() {
         if (measure == null) {
-            InfluxPropertiesProvider jmeterPropertiesProvider = new InfluxPropertiesProvider();
-            InfluxClient influxClient = InfluxClient.buildClient(
-                    new InfluxClientConfiguration(jmeterPropertiesProvider)
-            );
-            measure = new InfluxTestResultMeasureImpl(influxClient, jmeterPropertiesProvider);
+            measure = new InfluxTestResultMeasureImpl();
         }
         return measure;
     }
@@ -94,12 +85,6 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
                 .replace(" ", "\\ ")
                 .replace(",", ",\\ ")
                 .replace("=", "=\\ ");
-    }
-
-    @Override
-    public void close() {
-        super.close();
-        measure = null;
     }
 
 }

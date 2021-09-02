@@ -10,4 +10,6 @@ public interface InfluxTestResultMeasure {
 
     void close();
 
+    void configureMeasure();
+
 }

@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class InfluxSampleSender extends BatchSampleSender implements Serializable {
 
@@ -35,9 +37,13 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InfluxSampleSender.class);
 
-    private InfluxTestResultMeasure defaultResultMeasure;
+    private InfluxTestResultMeasure influxResultMeasure;
 
-    private boolean measureConfigured;
+    //Locking mechanism
+    private AtomicBoolean acquireLock;
+    private CountDownLatch initCompleteLatch;
+
+    private boolean initialized;
 
     /**
      * This constructor is invoked through reflection found in {@link SampleSenderFactory}
@@ -48,8 +54,9 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
 
     @Override
     public void testEnded(String host) {
-        if (defaultResultMeasure != null) {
-            defaultResultMeasure.close();
+        if (influxResultMeasure != null) {
+            influxResultMeasure.close();
+            System.out.println("Test Ended");
             LOGGER.info("Influx Connection closed");
         }
         super.testEnded(host);
@@ -57,22 +64,46 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
 
     @Override
     public void sampleOccurred(SampleEvent e) {
-        //Make sure the Influxdb measure is created only once when first sample event occurred
-        if (!measureConfigured) {
-            defaultResultMeasure = InfluxTestResultMeasureImpl.getInstance();
-            measureConfigured = true;
+        // Make sure other threads get block until the initialization of Influx finish
+        if (!acquireLock.getAndSet(true)) {
+            // Run only once at first invocation
+            influxResultMeasure.configureMeasure();
+            LOGGER.info("Configured Influx Result Measure");
+            initCompleteLatch.countDown();
+        } else {
+            try {
+                initCompleteLatch.await();
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
         }
-        defaultResultMeasure.writeTestResult(e);
-        LOGGER.info("Wrote Test to Influx");
+        influxResultMeasure.writeTestResult(e);
         super.sampleOccurred(e);
     }
 
     /**
-     * Internal method called by RMI. This method is invoked after this object is created
+     * Internal method called by RMI. This method acts as testStart()
      */
     private Object readResolve() throws ObjectStreamException {
-        //Initialize a new measure
-        LOGGER.info("Use server configured for this run: " + isClientConfigured());
+        // Initialize a new measure and lock
+        // Since this method is called by RMI, other Jmeter configuration is not provided yet
+        if (isClientConfigured()) {
+            configureSender();
+        }
         return this;
     }
+
+    /**
+     * Run the initialization once
+     */
+    private synchronized void configureSender() {
+        if (!initialized) {
+            LOGGER.info("Use server configuration for this run");
+            influxResultMeasure = InfluxTestResultMeasureImpl.getInstance();
+            acquireLock = new AtomicBoolean(false);
+            initCompleteLatch = new CountDownLatch(1);
+            initialized = true;
+        }
+    }
+
 }
