@@ -31,6 +31,8 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
     private boolean saveErrorResponse;
 
     private InfluxTestResultMeasureImpl() {
+        clientConfigured = new AtomicBoolean(false);
+        clientConfigureLatch = new CountDownLatch(1);
     }
 
     /**
@@ -41,8 +43,6 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
     public static synchronized InfluxTestResultMeasureImpl getInstance() {
         if (measure == null) {
             measure = new InfluxTestResultMeasureImpl();
-            measure.clientConfigured = new AtomicBoolean(false);
-            measure.clientConfigureLatch = new CountDownLatch(1);
         }
         return measure;
     }
