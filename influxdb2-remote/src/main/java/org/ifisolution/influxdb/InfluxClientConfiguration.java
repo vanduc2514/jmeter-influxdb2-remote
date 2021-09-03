@@ -1,5 +1,7 @@
 package org.ifisolution.influxdb;
 
+import org.ifisolution.exeptions.ClientValidationException;
+
 public class InfluxClientConfiguration {
 
     private final InfluxConfigurationProvider influxConfigurationProvider;
@@ -8,28 +10,30 @@ public class InfluxClientConfiguration {
         this.influxConfigurationProvider = influxConfigurationProvider;
     }
 
-    public String getConnectionUrl() {
+    public String getConnectionUrl() throws ClientValidationException {
         String connectionUrl = influxConfigurationProvider.provideConnectionUrl();
-        if (validateConnectionUrl(connectionUrl)) {
-            return connectionUrl;
+        validateConnectionUrl(connectionUrl);
+        return connectionUrl;
+    }
+
+    private void validateConnectionUrl(String connectionUrl) throws ClientValidationException {
+        boolean validated = connectionUrl.contains("http") || connectionUrl.contains("https");
+        if (!validated) {
+            throw new ClientValidationException("Connection url should contains http or https");
         }
-        return null;
     }
 
-    private boolean validateConnectionUrl(String connectionUrl) {
-        return connectionUrl.contains("http") || connectionUrl.contains("https");
-    }
-
-    public char[] getToken() {
+    public char[] getToken() throws ClientValidationException {
         String token = influxConfigurationProvider.provideToken();
-        if (validateToken(token)) {
-            return token.toCharArray();
-        }
-        return null;
+        validateToken(token);
+        return token.toCharArray();
     }
 
-    private boolean validateToken(String token) {
-        return true;
+    private void validateToken(String token) throws ClientValidationException {
+        boolean validated = token != null;
+        if (!validated) {
+            throw new ClientValidationException("Token is null");
+        }
     }
 
     public String getOrganization() {

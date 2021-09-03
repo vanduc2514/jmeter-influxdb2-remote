@@ -6,8 +6,12 @@ import com.influxdb.client.WriteApi;
 import com.influxdb.client.domain.HealthCheck;
 import com.influxdb.client.write.Point;
 import com.influxdb.exceptions.InfluxException;
+import org.ifisolution.exeptions.ClientValidationException;
+import org.ifisolution.exeptions.PluginException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.text.MessageFormat;
 
 public class InfluxClient {
 
@@ -25,20 +29,34 @@ public class InfluxClient {
         this.singletonWriteApi = actualClient.makeWriteApi();
     }
 
-    public static InfluxClient buildClient(InfluxClientConfiguration clientConfiguration) {
-        InfluxDBClient influxDBClient = InfluxDBClientFactory.create(
-                clientConfiguration.getConnectionUrl(),
-                clientConfiguration.getToken(),
-                clientConfiguration.getOrganization(),
-                clientConfiguration.getBucketName()
-        );
-        HealthCheck health = influxDBClient.health();
-        HealthCheck.StatusEnum healthStatus = health.getStatus();
-        System.out.println("Influx Status: " + healthStatus);
-        if (healthStatus == HealthCheck.StatusEnum.FAIL) {
-            System.out.println(health.getMessage());
+    public static InfluxClient buildClient(InfluxClientConfiguration clientConfiguration) throws PluginException {
+        InfluxDBClient influxDBClient;
+        try {
+            influxDBClient = InfluxDBClientFactory.create(
+                    clientConfiguration.getConnectionUrl(),
+                    clientConfiguration.getToken(),
+                    clientConfiguration.getOrganization(),
+                    clientConfiguration.getBucketName()
+            );
+        } catch (ClientValidationException e) {
+            throw new PluginException(e);
         }
-        return new InfluxClient(influxDBClient);
+        InfluxClient influxClient = new InfluxClient(influxDBClient);
+        LOGGER.info("Executing Initial Health Check to {}", influxDBClient.toString());
+        influxClient.healthCheck();
+        return influxClient;
+    }
+
+    private void healthCheck() throws PluginException {
+        HealthCheck health = actualClient.health();
+        HealthCheck.StatusEnum healthStatus = health.getStatus();
+        if (healthStatus == null ||
+                healthStatus == HealthCheck.StatusEnum.FAIL) {
+            String pattern = "Health Check fails @ {0}, Reason: {1}";
+            throw new PluginException(
+                    MessageFormat.format(pattern, actualClient.toString(), health.getMessage())
+            );
+        }
     }
 
     /**
@@ -47,15 +65,15 @@ public class InfluxClient {
      */
     public void writeInfluxPoint(Point point) throws InfluxException {
         // Write by Data Point
-        try {
-            singletonWriteApi.writePoint(point);
-        } catch (InfluxException e) {
-            e.printStackTrace();
-        }
+        singletonWriteApi.writePoint(point);
     }
 
     public void closeClient() {
         this.actualClient.close();
+    }
+
+    public String getHostName() {
+        return actualClient.toString();
     }
 
 }
