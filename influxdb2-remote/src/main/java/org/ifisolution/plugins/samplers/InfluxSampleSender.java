@@ -22,9 +22,7 @@ import org.apache.jmeter.samplers.RemoteSampleListener;
 import org.apache.jmeter.samplers.SampleEvent;
 import org.apache.jmeter.samplers.SampleSenderFactory;
 import org.ifisolution.measures.InfluxTestResultMeasure;
-import org.ifisolution.measures.impl.InfluxTestResultMeasureImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.ifisolution.measures.impl.TestResultManager;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
@@ -33,9 +31,7 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
 
     private static final long serialVersionUID = 3371144997364645511L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InfluxSampleSender.class);
-
-    private InfluxTestResultMeasure influxResultMeasure;
+    private TestResultManager testResultManager;
 
     /**
      * This constructor is invoked through reflection found in {@link SampleSenderFactory}
@@ -46,19 +42,20 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
 
     @Override
     public void testEnded(String host) {
-        if (influxResultMeasure != null) {
-            influxResultMeasure.close();
+        InfluxTestResultMeasure testResultMeasure = testResultManager.getInfluxMeasure();
+        if (testResultMeasure != null) {
+            testResultMeasure.closeInfluxConnection();
         }
         super.testEnded(host);
     }
 
     @Override
     public void sampleOccurred(SampleEvent e) {
-        // Since the Jmeter properties sent from master is propagated at this point,
-        // This is the work-around solution so far to create Influx client using the master
-        // properties
-        influxResultMeasure.configureMeasureIdempotent();
-        influxResultMeasure.writeTestResult(e);
+        // The Jmeter properties sent from master is propagated at this point.
+        InfluxTestResultMeasure testResultMeasure = testResultManager.getInfluxMeasure();
+        if (testResultMeasure != null) {
+            testResultMeasure.writeTestResult(e);
+        }
         super.sampleOccurred(e);
     }
 
@@ -66,9 +63,7 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
      * Internal method called by RMI. This method acts as testStart()
      */
     private Object readResolve() throws ObjectStreamException {
-        // Initialize a new measure and lock
-        // Since this method is called by RMI, other Jmeter configuration is not provided yet
-        influxResultMeasure = InfluxTestResultMeasureImpl.getInstance();
+        testResultManager = TestResultManager.makeInstance();
         return this;
     }
 
