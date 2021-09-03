@@ -1,21 +1,22 @@
 package org.ifisolution.measures.impl;
 
 import org.ifisolution.influxdb.InfluxClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractInfluxMeasure {
 
+    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractInfluxMeasure.class);
+
     protected String hostName;
 
-    //Avoid NPE in Point
-    protected String testName;
+    //Avoid NPE in Influx Point
+    protected final String testName;
 
-    //Avoid NPE in Point
-    protected String runId;
+    //Avoid NPE in Influx Point
+    protected final String runId;
 
-    protected InfluxClient influxClient;
-
-    protected AbstractInfluxMeasure() {
-    }
+    protected final InfluxClient influxClient;
 
     public AbstractInfluxMeasure(InfluxClient influxClient,
                                  MeasureConfigurationProvider configurationProvider) {
@@ -25,8 +26,9 @@ public abstract class AbstractInfluxMeasure {
         runId = configurationProvider.provideRunId();
     }
 
-    public void close() {
-        this.influxClient.closeClient();
+    public void closeInfluxConnection() {
+        influxClient.closeClient();
+        LOGGER.info("Connection to Influx @ {} closed", influxClient.getHostName());
     }
 
 }

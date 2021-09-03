@@ -4,9 +4,7 @@ import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.visualizers.backend.UserMetric;
-import org.ifisolution.configuration.InfluxPropertiesProvider;
 import org.ifisolution.influxdb.InfluxClient;
-import org.ifisolution.influxdb.InfluxClientConfiguration;
 import org.ifisolution.measures.InfluxTestStateMeasure;
 import org.ifisolution.measures.metrics.TestStartEndMeasurement;
 import org.ifisolution.measures.metrics.VirtualUsersMeasurement;
@@ -14,22 +12,9 @@ import org.ifisolution.util.MeasureUtil;
 
 public class InfluxTestStateMeasureImpl extends AbstractInfluxMeasure implements InfluxTestStateMeasure {
 
-    private static InfluxTestStateMeasureImpl measure;
-
-    private InfluxTestStateMeasureImpl(InfluxClient influxClient,
+    public InfluxTestStateMeasureImpl(InfluxClient influxClient,
                                        MeasureConfigurationProvider configurationProvider) {
         super(influxClient, configurationProvider);
-    }
-
-    public static InfluxTestStateMeasureImpl getInstance() {
-        if (measure == null) {
-            InfluxPropertiesProvider jmeterPropertiesProvider = new InfluxPropertiesProvider();
-            InfluxClient influxClient = InfluxClient.buildClient(
-                    new InfluxClientConfiguration(jmeterPropertiesProvider)
-            );
-            measure = new InfluxTestStateMeasureImpl(influxClient, jmeterPropertiesProvider);
-        }
-        return measure;
     }
 
     @Override
