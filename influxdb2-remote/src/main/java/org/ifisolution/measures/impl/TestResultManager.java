@@ -43,7 +43,7 @@ public class TestResultManager {
     /**
      * Get the Influx Measure for Test Result measure. This method initializes an
      * {@link InfluxClient} while blocking other threads until the initialization
-     * is done, will return immediately if the initialization is already executed.
+     * is done, return immediately if the initialization is already executed.
      *
      * @return an implementation of {@link InfluxTestResultMeasure} or null if the
      * {@link InfluxClient} cannot be initialized.
