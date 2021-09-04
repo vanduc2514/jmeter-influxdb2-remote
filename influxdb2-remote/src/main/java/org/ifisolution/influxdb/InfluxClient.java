@@ -90,8 +90,8 @@ public class InfluxClient {
         // Write by Data Point
         try {
             singletonWriteApi.writePoint(point);
-        } catch (InfluxException e) {
-            LOGGER.error(e.getMessage());
+        } catch (InfluxException | IllegalArgumentException e) {
+            LOGGER.error("Could not write to Influx. Reason: {}", e.getMessage());
         }
     }
 
