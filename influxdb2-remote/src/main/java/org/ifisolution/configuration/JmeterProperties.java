@@ -8,7 +8,8 @@ public enum JmeterProperties {
     INFLUX_BUCKET("influxdb.bucket"),
     INFLUX_SSL_ENABLE("influxdb.ssl.enable"),
     TEST_NAME("test.name"),
-    TEST_RUN_ID("test.runId");
+    TEST_RUN_ID("test.runId"),
+    SAVE_ERROR_RESPONSE("save_error_response");
 
     private final String key;
 

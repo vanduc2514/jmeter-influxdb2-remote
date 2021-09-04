@@ -60,4 +60,9 @@ public class InfluxPropertiesProvider implements InfluxConfigurationProvider, Me
     public String provideHostName() {
         return JMeterUtils.getLocalHostName();
     }
+
+    @Override
+    public boolean provideSaveErrorResponseOption() {
+        return Boolean.parseBoolean(JMeterUtils.getProperty(SAVE_ERROR_RESPONSE.key()));
+    }
 }

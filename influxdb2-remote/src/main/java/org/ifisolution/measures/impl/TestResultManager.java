@@ -68,6 +68,7 @@ public class TestResultManager {
                 );
                 LOGGER.info("Acquired Influx Client to {}", influxClient.getHostName());
                 testResultMeasure = new InfluxTestResultMeasureImpl(influxClient, propertiesProvider);
+                testResultMeasure.setSaveErrorResponse(propertiesProvider.provideSaveErrorResponseOption());
             } finally {
                 configureLatch.countDown();
             }

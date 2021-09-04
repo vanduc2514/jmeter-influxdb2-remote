@@ -55,6 +55,11 @@ test.name=
 # The run id that appears in Influx
 test.runId=
 
+# Test Specific properties
+# Set the option to save error response to true/false
+# By default, this plugin never save error response to reduce workload
+save_error_response=
+
 # Remote properties
 # Specific SampleSender class to let the remote machine directly send to Influx
 # Don't change this value or the plugin will not work
