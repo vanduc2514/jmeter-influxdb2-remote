@@ -34,14 +34,19 @@ public class InfluxTestStateListener extends AbstractBackendListenerClient {
     }
 
     @Override
-    public void setupTest(BackendListenerContext context) throws Exception {
-        testStateMeasure = createMeasure();
-        scheduler = Executors.newScheduledThreadPool(SCHEDULER_THREAD_POOL_SIZE);
-        testStateMeasure.writeStartState();
-        scheduler.scheduleAtFixedRate(
-                () -> testStateMeasure.writeUserMetric(getUserMetrics()),
-                1, VIRTUAL_USER_INTERVAL, TimeUnit.SECONDS
-        );
+    public void setupTest(BackendListenerContext context) {
+        try {
+            testStateMeasure = createMeasure();
+            scheduler = Executors.newScheduledThreadPool(SCHEDULER_THREAD_POOL_SIZE);
+            testStateMeasure.writeStartState();
+            scheduler.scheduleAtFixedRate(
+                    () -> testStateMeasure.writeUserMetric(getUserMetrics()),
+                    1, VIRTUAL_USER_INTERVAL, TimeUnit.SECONDS
+            );
+        } catch (PluginException e) {
+            LOGGER.error("Could not create {}. Reason: {}",
+                    InfluxTestStateMeasure.class.getSimpleName(), e.getMessage());
+        }
     }
 
     private InfluxTestStateMeasure createMeasure() throws PluginException {

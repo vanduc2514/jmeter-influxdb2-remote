@@ -52,7 +52,8 @@ public class TestResultManager {
         try {
             initializeInfluxMeasureBlock();
         } catch (PluginException | InterruptedException e) {
-            LOGGER.error("Could not create influx measure. Reason: {}", e.getMessage());
+            LOGGER.error("Could not create {}. Reason: {}",
+                    InfluxTestResultMeasure.class.getSimpleName() , e.getMessage());
         }
         return testResultMeasure;
     }

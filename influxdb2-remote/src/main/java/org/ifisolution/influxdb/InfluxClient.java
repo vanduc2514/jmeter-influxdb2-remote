@@ -44,7 +44,7 @@ public class InfluxClient {
                     clientConfiguration.getBucketName()
             );
             influxClient = new InfluxClient(influxDBClient, connectionUrl);
-        } catch (ClientValidationException e) {
+        } catch (ClientValidationException | InfluxException e) {
             throw new PluginException(e);
         }
         LOGGER.info("Executing Initial Health Check to {}", influxClient.getHostName());
@@ -57,7 +57,7 @@ public class InfluxClient {
         HealthCheck.StatusEnum healthStatus = health.getStatus();
         if (healthStatus == null ||
                 healthStatus == HealthCheck.StatusEnum.FAIL) {
-            String pattern = "Health Check fails @ {0}, Reason: {1}";
+            String pattern = "Health Check fails. {1}";
             throw new PluginException(
                     MessageFormat.format(pattern, getHostName(), health.getMessage())
             );
@@ -68,9 +68,13 @@ public class InfluxClient {
      * Write values to influx Database
      * @param point the influxDb {@link Point} wrapper
      */
-    public void writeInfluxPoint(Point point) throws InfluxException {
+    public void writeInfluxPoint(Point point) {
         // Write by Data Point
-        singletonWriteApi.writePoint(point);
+        try {
+            singletonWriteApi.writePoint(point);
+        } catch (InfluxException e) {
+            LOGGER.error(e.getMessage());
+        }
     }
 
     public void closeClient() {
