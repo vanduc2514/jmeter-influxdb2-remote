@@ -34,6 +34,13 @@ public class InfluxClient {
         this.singletonWriteApi = actualClient.makeWriteApi();
     }
 
+    /**
+     * Build a {@link InfluxClient} to acquire a connection to Influx Database
+     *
+     * @param clientConfiguration the {@link InfluxClientConfiguration} contains configuration for this client
+     * @return a {@link InfluxClient}
+     * @throws PluginException when the {@link InfluxClient} could not establish a connection to Influx
+     */
     public static InfluxClient buildClient(InfluxClientConfiguration clientConfiguration) throws PluginException {
         InfluxDBClient influxDBClient;
         InfluxClient influxClient;
