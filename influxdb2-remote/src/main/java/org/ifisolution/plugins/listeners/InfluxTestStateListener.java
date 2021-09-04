@@ -30,7 +30,7 @@ public class InfluxTestStateListener extends AbstractBackendListenerClient {
 
     @Override
     public void handleSampleResults(List<SampleResult> sampleResults, BackendListenerContext context) {
-        //NOOP since this was handled in the SampleSender
+        //NOOP since this is handled in the InfluxSampleSender from remote
     }
 
     @Override
@@ -39,6 +39,7 @@ public class InfluxTestStateListener extends AbstractBackendListenerClient {
             testStateMeasure = createMeasure();
             scheduler = Executors.newScheduledThreadPool(SCHEDULER_THREAD_POOL_SIZE);
             testStateMeasure.writeStartState();
+            // Constantly write virtual user with an interval of 5 seconds
             scheduler.scheduleAtFixedRate(
                     () -> testStateMeasure.writeUserMetric(getUserMetrics()),
                     1, VIRTUAL_USER_INTERVAL, TimeUnit.SECONDS

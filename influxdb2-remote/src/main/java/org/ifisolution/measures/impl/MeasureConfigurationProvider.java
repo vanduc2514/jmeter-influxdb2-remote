@@ -8,4 +8,6 @@ public interface MeasureConfigurationProvider {
 
     String provideHostName();
 
+    boolean provideSaveErrorResponseOption();
+
 }
