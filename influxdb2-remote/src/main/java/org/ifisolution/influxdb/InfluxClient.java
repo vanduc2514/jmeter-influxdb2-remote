@@ -3,9 +3,11 @@ package org.ifisolution.influxdb;
 import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.InfluxDBClientFactory;
 import com.influxdb.client.WriteApi;
+import com.influxdb.client.domain.Bucket;
 import com.influxdb.client.domain.HealthCheck;
 import com.influxdb.client.write.Point;
 import com.influxdb.exceptions.InfluxException;
+import com.influxdb.exceptions.UnauthorizedException;
 import org.ifisolution.exeptions.ClientValidationException;
 import org.ifisolution.exeptions.PluginException;
 import org.slf4j.Logger;
@@ -35,32 +37,48 @@ public class InfluxClient {
     public static InfluxClient buildClient(InfluxClientConfiguration clientConfiguration) throws PluginException {
         InfluxDBClient influxDBClient;
         InfluxClient influxClient;
+        String bucketName = clientConfiguration.getBucketName();
         try {
             String connectionUrl = clientConfiguration.getConnectionUrl();
             influxDBClient = InfluxDBClientFactory.create(
                     connectionUrl,
                     clientConfiguration.getToken(),
                     clientConfiguration.getOrganization(),
-                    clientConfiguration.getBucketName()
+                    bucketName
             );
             influxClient = new InfluxClient(influxDBClient, connectionUrl);
         } catch (ClientValidationException | InfluxException e) {
             throw new PluginException(e);
         }
-        LOGGER.info("Executing Initial Health Check to {}", influxClient.getHostName());
-        influxClient.healthCheck();
+        influxClient.checkHealth();
+        influxClient.verifyBucketAuthorization(bucketName);
         return influxClient;
     }
 
-    private void healthCheck() throws PluginException {
+    private void checkHealth() throws PluginException {
+        LOGGER.info("Executing Initial Health Check to {}", getHostName());
         HealthCheck health = actualClient.health();
         HealthCheck.StatusEnum healthStatus = health.getStatus();
         if (healthStatus == null ||
                 healthStatus == HealthCheck.StatusEnum.FAIL) {
-            String pattern = "Health Check fails. {1}";
+            String pattern = "Health Check fails. {0}";
             throw new PluginException(
                     MessageFormat.format(pattern, getHostName(), health.getMessage())
             );
+        }
+        LOGGER.info("Influx Database health status: {}", healthStatus);
+    }
+
+    private void verifyBucketAuthorization(String bucketName) throws PluginException {
+        LOGGER.info("Verifying Authorization to Bucket \"{}\"", bucketName);
+        try {
+            Bucket bucket = actualClient.getBucketsApi().findBucketByName(bucketName);
+            if (bucket == null) {
+                throw new PluginException("Cannot authorize Bucket");
+            }
+            LOGGER.info("Authorized to Influx Bucket {}", bucket.toString().replaceAll("^.*?(?=\\{)", "\n"));
+        } catch (UnauthorizedException e) {
+            throw new PluginException(e);
         }
     }
 
@@ -78,7 +96,11 @@ public class InfluxClient {
     }
 
     public void closeClient() {
-        this.actualClient.close();
+        try {
+            this.actualClient.close();
+        } catch (InfluxException e) {
+            LOGGER.error(e.getMessage());
+        }
     }
 
     public String getHostName() {
