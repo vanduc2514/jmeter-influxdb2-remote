@@ -21,28 +21,33 @@ public class InfluxClient {
 
     private final WriteApi singletonWriteApi;
 
+    private final String hostName;
+
     /**
      * Use factory method {@link #buildClient(InfluxClientConfiguration)}
      */
-    private InfluxClient(InfluxDBClient actualClient) {
+    private InfluxClient(InfluxDBClient actualClient, String hostName) {
         this.actualClient = actualClient;
+        this.hostName = hostName;
         this.singletonWriteApi = actualClient.makeWriteApi();
     }
 
     public static InfluxClient buildClient(InfluxClientConfiguration clientConfiguration) throws PluginException {
         InfluxDBClient influxDBClient;
+        InfluxClient influxClient;
         try {
+            String connectionUrl = clientConfiguration.getConnectionUrl();
             influxDBClient = InfluxDBClientFactory.create(
-                    clientConfiguration.getConnectionUrl(),
+                    connectionUrl,
                     clientConfiguration.getToken(),
                     clientConfiguration.getOrganization(),
                     clientConfiguration.getBucketName()
             );
+            influxClient = new InfluxClient(influxDBClient, connectionUrl);
         } catch (ClientValidationException e) {
             throw new PluginException(e);
         }
-        InfluxClient influxClient = new InfluxClient(influxDBClient);
-        LOGGER.info("Executing Initial Health Check to {}", influxDBClient.toString());
+        LOGGER.info("Executing Initial Health Check to {}", influxClient.getHostName());
         influxClient.healthCheck();
         return influxClient;
     }
@@ -54,7 +59,7 @@ public class InfluxClient {
                 healthStatus == HealthCheck.StatusEnum.FAIL) {
             String pattern = "Health Check fails @ {0}, Reason: {1}";
             throw new PluginException(
-                    MessageFormat.format(pattern, actualClient.toString(), health.getMessage())
+                    MessageFormat.format(pattern, getHostName(), health.getMessage())
             );
         }
     }
@@ -73,7 +78,7 @@ public class InfluxClient {
     }
 
     public String getHostName() {
-        return actualClient.toString();
+        return hostName;
     }
 
 }
