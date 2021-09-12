@@ -3,11 +3,9 @@ package org.ifisolution.influxdb;
 import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.InfluxDBClientFactory;
 import com.influxdb.client.WriteApi;
-import com.influxdb.client.domain.Bucket;
 import com.influxdb.client.domain.HealthCheck;
 import com.influxdb.client.write.Point;
 import com.influxdb.exceptions.InfluxException;
-import com.influxdb.exceptions.UnauthorizedException;
 import org.ifisolution.exeptions.ClientValidationException;
 import org.ifisolution.exeptions.PluginException;
 import org.slf4j.Logger;
@@ -58,7 +56,7 @@ public class InfluxClient {
             throw new PluginException(e);
         }
         influxClient.checkHealth();
-        influxClient.verifyBucketAuthorization(bucketName);
+//        influxClient.verifyBucketAuthorization(bucketName);
         return influxClient;
     }
 
@@ -76,18 +74,18 @@ public class InfluxClient {
         LOGGER.info("Influx Database health status: {}", healthStatus);
     }
 
-    private void verifyBucketAuthorization(String bucketName) throws PluginException {
-        LOGGER.info("Verifying Authorization to Bucket \"{}\"", bucketName);
-        try {
-            Bucket bucket = actualClient.getBucketsApi().findBucketByName(bucketName);
-            if (bucket == null) {
-                throw new PluginException("Cannot authorize Bucket");
-            }
-            LOGGER.info("Authorized to Influx Bucket {}", bucket.toString().replaceAll("^.*?(?=\\{)", "\n"));
-        } catch (UnauthorizedException e) {
-            throw new PluginException(e);
-        }
-    }
+//    private void verifyBucketAuthorization(String bucketName) throws PluginException {
+//        LOGGER.info("Verifying Authorization to Bucket \"{}\"", bucketName);
+//        try {
+//            Bucket bucket = actualClient.getBucketsApi().findBucketByName(bucketName);
+//            if (bucket == null) {
+//                throw new PluginException("Cannot authorize Bucket");
+//            }
+//            LOGGER.info("Authorized to Influx Bucket {}", bucket.toString().replaceAll("^.*?(?=\\{)", "\n"));
+//        } catch (UnauthorizedException e) {
+//            throw new PluginException(e);
+//        }
+//    }
 
     /**
      * Write values to influx Database
