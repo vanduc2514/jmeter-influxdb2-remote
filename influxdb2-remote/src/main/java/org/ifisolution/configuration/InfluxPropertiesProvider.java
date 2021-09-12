@@ -65,4 +65,9 @@ public class InfluxPropertiesProvider implements InfluxConfigurationProvider, Me
     public boolean provideSaveErrorResponseOption() {
         return Boolean.parseBoolean(JMeterUtils.getProperty(SAVE_ERROR_RESPONSE.key()));
     }
+
+    @Override
+    public boolean isStandalone() {
+        return Boolean.parseBoolean(JMeterUtils.getProperty(MASTER_SEND_RESULT.key()));
+    }
 }

@@ -20,6 +20,28 @@ Install the plugin to `${JMETER_HOME}/lib/ext` on master and each slave machine
 > before continue
 
 ```properties
+# Remote properties
+# Specific the SampleSender class to let remote machine directly send to Influx Database
+# Ignore this property if the test is not running in distributed mode
+mode=org.ifisolution.plugins.samplers.InfluxSampleSender
+
+# Plugin properties
+# Setting this to true to let the master send test result to Influx Database
+master_send_result=
+
+# Test Specific properties
+# Set the option to save error response to true/false
+# By default, this plugin never save error response to reduce workload
+save_error_response=
+
+# Test Specific properties
+# The test name that appears in Influx
+test.name=
+
+# Test Specific properties
+# The run id that appears in Influx
+test.runId=
+
 # Influx properties
 # The host name of Influx database, whether it is a resolved name or an Ip address
 # Example: localhost
@@ -47,23 +69,6 @@ influxdb.bucket=
 # Setting this to blank or ignore it will use the default http connection
 influxdb.ssl.enable=
 
-# Test Specific properties
-# The test name that appears in Influx
-test.name=
-
-# Test Specific properties
-# The run id that appears in Influx
-test.runId=
-
-# Test Specific properties
-# Set the option to save error response to true/false
-# By default, this plugin never save error response to reduce workload
-save_error_response=
-
-# Remote properties
-# Specific SampleSender class to let the remote machine directly send to Influx
-# Don't change this value or the plugin will not work
-mode=org.ifisolution.plugins.samplers.InfluxSampleSender
 ```
 
 This plugin can be configured from the master machine or configured on master and each slave machine

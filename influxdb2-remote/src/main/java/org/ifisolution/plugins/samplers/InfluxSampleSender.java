@@ -54,7 +54,7 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
         // The Jmeter properties sent from master is propagated at this point.
         InfluxTestResultMeasure testResultMeasure = testResultManager.getInfluxMeasure();
         if (testResultMeasure != null) {
-            testResultMeasure.writeTestResult(e);
+            testResultMeasure.writeTestResult(e.getResult());
         }
         super.sampleOccurred(e);
     }

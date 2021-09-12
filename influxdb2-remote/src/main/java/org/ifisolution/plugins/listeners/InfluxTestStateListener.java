@@ -7,7 +7,9 @@ import org.ifisolution.configuration.InfluxPropertiesProvider;
 import org.ifisolution.exeptions.PluginException;
 import org.ifisolution.influxdb.InfluxClient;
 import org.ifisolution.influxdb.InfluxClientConfiguration;
+import org.ifisolution.measures.InfluxTestResultMeasure;
 import org.ifisolution.measures.InfluxTestStateMeasure;
+import org.ifisolution.measures.impl.InfluxTestResultMeasureImpl;
 import org.ifisolution.measures.impl.InfluxTestStateMeasureImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,17 +28,26 @@ public class InfluxTestStateListener extends AbstractBackendListenerClient {
 
     private InfluxTestStateMeasure testStateMeasure;
 
+    private InfluxTestResultMeasure testResultMeasure;
+
+    private InfluxClient influxClient;
+
     private ScheduledExecutorService scheduler;
 
     @Override
     public void handleSampleResults(List<SampleResult> sampleResults, BackendListenerContext context) {
-        //NOOP since this is handled in the InfluxSampleSender from remote
+        sampleResults.forEach(res -> {
+            getUserMetrics().add(res);
+            if (testStateMeasure != null) {
+                testResultMeasure.writeTestResult(res);
+            }
+        });
     }
 
     @Override
     public void setupTest(BackendListenerContext context) {
         try {
-            testStateMeasure = createMeasure();
+            boostrapMeasure();
             scheduler = Executors.newScheduledThreadPool(SCHEDULER_THREAD_POOL_SIZE);
             testStateMeasure.writeStartState();
             // Constantly write virtual user with an interval of 5 seconds
@@ -50,17 +61,19 @@ public class InfluxTestStateListener extends AbstractBackendListenerClient {
         }
     }
 
-    private InfluxTestStateMeasure createMeasure() throws PluginException {
+    private void boostrapMeasure() throws PluginException {
         InfluxPropertiesProvider propertiesProvider = new InfluxPropertiesProvider();
-        InfluxClient influxClient = InfluxClient.buildClient(
-                new InfluxClientConfiguration(propertiesProvider)
-        );
+        boolean standaloneMode = propertiesProvider.isStandalone();
+        influxClient = InfluxClient.buildClient(new InfluxClientConfiguration(propertiesProvider));
         LOGGER.info("Acquired Influx Client to {}", influxClient.getHostName());
-        return new InfluxTestStateMeasureImpl(influxClient, propertiesProvider);
+        testStateMeasure = new InfluxTestStateMeasureImpl(influxClient, propertiesProvider);
+        if (standaloneMode) {
+            testResultMeasure = new InfluxTestResultMeasureImpl(influxClient, propertiesProvider);
+        }
     }
 
     @Override
-    public void teardownTest(BackendListenerContext context) {
+    public void teardownTest(BackendListenerContext context) throws Exception {
         if (testStateMeasure == null || scheduler == null) {
             return;
         }
@@ -76,6 +89,7 @@ public class InfluxTestStateListener extends AbstractBackendListenerClient {
             LOGGER.error("Error waiting for end of scheduler " + e);
         }
 
-        testStateMeasure.closeInfluxConnection();
+        influxClient.closeClient();
+        super.teardownTest(context);
     }
 }

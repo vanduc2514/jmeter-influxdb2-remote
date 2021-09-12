@@ -10,4 +10,6 @@ public interface MeasureConfigurationProvider {
 
     boolean provideSaveErrorResponseOption();
 
+    boolean isStandalone();
+
 }

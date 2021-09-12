@@ -2,7 +2,6 @@ package org.ifisolution.measures.impl;
 
 import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
-import org.apache.jmeter.samplers.SampleEvent;
 import org.apache.jmeter.samplers.SampleResult;
 import org.ifisolution.influxdb.InfluxClient;
 import org.ifisolution.measures.InfluxTestResultMeasure;
@@ -28,8 +27,7 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
     }
 
     @Override
-    public void writeTestResult(SampleEvent sampleEvent) {
-        SampleResult sampleResult = sampleEvent.getResult();
+    public void writeTestResult(SampleResult sampleResult) {
         long latency = sampleResult.getLatency();
         long connectTime = sampleResult.getConnectTime();
         String failureMessage = sampleResult.getFirstAssertionFailureMessage();
