@@ -25,7 +25,7 @@ RUN wget -O "lib/cmdrunner-2.2.jar" https://repo1.maven.org/maven2/kg/apc/cmdrun
     java -cp lib/ext/jmeter-plugins-manager-1.6.jar org.jmeterplugins.repository.PluginManagerCMDInstaller
 
 # Install required plugins
-RUN wget -O "lib/ext/jmeter-influxdb2-remote-1.1.jar" https://github.com/vanduc2514/jmeter-influxdb2-remote/releases/download/v1.1/jmeter-influxdb2-remote-1.1.jar
+RUN wget -O "lib/ext/jmeter-influxdb2-remote-1.2.jar" https://github.com/vanduc2514/jmeter-influxdb2-remote/releases/download/v1.1/jmeter-influxdb2-remote-1.2.jar
 COPY plugins.txt .
 RUN bin/PluginsManagerCMD.sh install $(cat plugins.txt | grep ^[^#])
 
