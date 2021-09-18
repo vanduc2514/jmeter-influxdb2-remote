@@ -14,6 +14,8 @@ import org.ifisolution.measures.impl.InfluxTestStateMeasureImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -32,16 +34,27 @@ public class InfluxTestStateListener extends AbstractBackendListenerClient {
 
     private InfluxClient influxClient;
 
+    private boolean measureSubResult;
+
     private ScheduledExecutorService scheduler;
 
     @Override
     public void handleSampleResults(List<SampleResult> sampleResults, BackendListenerContext context) {
+        List<SampleResult> allResults = new ArrayList<>();
         sampleResults.forEach(res -> {
+            allResults.add(res);
+            if (measureSubResult) {
+                Collections.addAll(allResults, res.getSubResults());
+            }
+        });
+
+        allResults.forEach(res -> {
             getUserMetrics().add(res);
             if (testStateMeasure != null) {
                 testResultMeasure.writeTestResult(res);
             }
         });
+
     }
 
     @Override
@@ -69,6 +82,7 @@ public class InfluxTestStateListener extends AbstractBackendListenerClient {
         testStateMeasure = new InfluxTestStateMeasureImpl(influxClient, propertiesProvider);
         if (standaloneMode) {
             testResultMeasure = new InfluxTestResultMeasureImpl(influxClient, propertiesProvider);
+            measureSubResult = propertiesProvider.measureSubResult();
         }
     }
 
@@ -86,7 +100,8 @@ public class InfluxTestStateListener extends AbstractBackendListenerClient {
                 LOGGER.info("influxDB scheduler terminated!");
             }
         } catch (InterruptedException e) {
-            LOGGER.error("Error waiting for end of scheduler " + e);
+            LOGGER.error("Error waiting for end of scheduler", e);
+            Thread.currentThread().interrupt();
         }
 
         influxClient.closeClient();

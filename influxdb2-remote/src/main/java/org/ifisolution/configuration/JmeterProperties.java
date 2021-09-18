@@ -10,7 +10,8 @@ public enum JmeterProperties {
     TEST_NAME("test.name"),
     TEST_RUN_ID("test.runId"),
     SAVE_ERROR_RESPONSE("save_error_response"),
-    MASTER_SEND_RESULT("master_send_result");
+    MASTER_SEND_RESULT("master_send_result"),
+    MEASURE_SUB_RESULT("measure_sub_result");
 
     private final String key;
 

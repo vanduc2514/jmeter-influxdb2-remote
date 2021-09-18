@@ -1,5 +1,6 @@
 package org.ifisolution.configuration;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.util.JMeterUtils;
 import org.ifisolution.influxdb.InfluxConfigurationProvider;
 import org.ifisolution.measures.impl.MeasureConfigurationProvider;
@@ -69,5 +70,14 @@ public class InfluxPropertiesProvider implements InfluxConfigurationProvider, Me
     @Override
     public boolean isStandalone() {
         return Boolean.parseBoolean(JMeterUtils.getProperty(MASTER_SEND_RESULT.key()));
+    }
+
+    @Override
+    public boolean measureSubResult() {
+        String property = JMeterUtils.getProperty(MEASURE_SUB_RESULT.key());
+        if (StringUtils.isEmpty(property)) {
+            return true; // Default if empty or not set will return true
+        }
+        return Boolean.parseBoolean(property);
     }
 }

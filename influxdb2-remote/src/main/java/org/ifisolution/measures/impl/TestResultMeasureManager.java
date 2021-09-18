@@ -11,11 +11,11 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TestResultManager {
+public class TestResultMeasureManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestResultManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestResultMeasureManager.class);
 
-    private static TestResultManager INSTANCE;
+    private static TestResultMeasureManager INSTANCE;
 
     private InfluxTestResultMeasureImpl testResultMeasure;
 
@@ -23,20 +23,23 @@ public class TestResultManager {
 
     private CountDownLatch configureLatch;
 
-    private TestResultManager() {
+    private boolean measureSubResult;
+
+    private TestResultMeasureManager() {
     }
 
     /**
      * Make a new singleton instance and reset to original state
      *
-     * @return the {@link TestResultManager}
+     * @return the {@link TestResultMeasureManager}
      */
-    public static synchronized TestResultManager makeInstance() {
+    public static synchronized TestResultMeasureManager makeInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new TestResultManager();
+            INSTANCE = new TestResultMeasureManager();
         }
         INSTANCE.beingConfigured = new AtomicBoolean(false);
         INSTANCE.configureLatch = new CountDownLatch(1);
+        INSTANCE.measureSubResult = false;
         return INSTANCE;
     }
 
@@ -54,6 +57,7 @@ public class TestResultManager {
         } catch (PluginException | InterruptedException e) {
             LOGGER.error("Could not create {}. Reason: {}",
                     InfluxTestResultMeasure.class.getSimpleName() , e.getMessage());
+            Thread.currentThread().interrupt();
         }
         return testResultMeasure;
     }
@@ -67,6 +71,7 @@ public class TestResultManager {
                         new InfluxClientConfiguration(propertiesProvider)
                 );
                 LOGGER.info("Acquired Influx Client to {}", influxClient.getHostName());
+                measureSubResult = propertiesProvider.measureSubResult();
                 testResultMeasure = new InfluxTestResultMeasureImpl(influxClient, propertiesProvider);
                 testResultMeasure.setSaveErrorResponse(propertiesProvider.provideSaveErrorResponseOption());
             } finally {
@@ -78,4 +83,12 @@ public class TestResultManager {
         }
     }
 
+    /**
+     * Return the Property Configuration passed when execute test
+     *
+     * @return true if measure Sub Result
+     */
+    public boolean measureSubResult() {
+        return measureSubResult;
+    }
 }

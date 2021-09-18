@@ -17,12 +17,9 @@
 
 package org.ifisolution.plugins.samplers;
 
-import org.apache.jmeter.samplers.BatchSampleSender;
-import org.apache.jmeter.samplers.RemoteSampleListener;
-import org.apache.jmeter.samplers.SampleEvent;
-import org.apache.jmeter.samplers.SampleSenderFactory;
+import org.apache.jmeter.samplers.*;
 import org.ifisolution.measures.InfluxTestResultMeasure;
-import org.ifisolution.measures.impl.TestResultManager;
+import org.ifisolution.measures.impl.TestResultMeasureManager;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
@@ -31,7 +28,7 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
 
     private static final long serialVersionUID = 3371144997364645511L;
 
-    private TestResultManager testResultManager;
+    private transient TestResultMeasureManager measureManager;
 
     /**
      * This constructor is invoked through reflection found in {@link SampleSenderFactory}
@@ -42,7 +39,7 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
 
     @Override
     public void testEnded(String host) {
-        InfluxTestResultMeasure testResultMeasure = testResultManager.getInfluxMeasure();
+        InfluxTestResultMeasure testResultMeasure = measureManager.getInfluxMeasure();
         if (testResultMeasure != null) {
             testResultMeasure.closeInfluxConnection();
         }
@@ -52,9 +49,15 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
     @Override
     public void sampleOccurred(SampleEvent e) {
         // The Jmeter properties sent from master is propagated at this point.
-        InfluxTestResultMeasure testResultMeasure = testResultManager.getInfluxMeasure();
+        InfluxTestResultMeasure testResultMeasure = measureManager.getInfluxMeasure();
         if (testResultMeasure != null) {
             testResultMeasure.writeTestResult(e.getResult());
+            if (measureManager.measureSubResult()) {
+                SampleResult[] subResults = e.getResult().getSubResults();
+                for (SampleResult subResult : subResults) {
+                    testResultMeasure.writeTestResult(subResult);
+                }
+            }
         }
         super.sampleOccurred(e);
     }
@@ -63,7 +66,7 @@ public class InfluxSampleSender extends BatchSampleSender implements Serializabl
      * Internal method called by RMI. This method acts as testStart()
      */
     private Object readResolve() throws ObjectStreamException {
-        testResultManager = TestResultManager.makeInstance();
+        measureManager = TestResultMeasureManager.makeInstance();
         return this;
     }
 
