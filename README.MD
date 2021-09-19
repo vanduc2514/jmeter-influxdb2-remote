@@ -35,6 +35,11 @@ master_send_result=
 save_error_response=
 
 # Test Specific properties
+# Set the option to save sub result from sample result 
+# By default, this property is set to true
+save_measure_sub_result=
+
+# Test Specific properties
 # The test name that appears in Influx
 test.name=
 
