@@ -1,23 +1,9 @@
 package org.ifisolution.measures.metrics;
 
-/**
- * Constants (Tag, Field, Measurement) names for the requests measurement. *
- * @author Alexander Wert
- * @author Michael Derevyanko (minor changes and improvements)
- */
 public interface RequestMeasurement {
 
-	/**
-	 * Measurement name.
-	 */
 	String MEASUREMENT_NAME = "requestsRaw";
 
-	/**
-	 * Tags.
-	 *
-	 * @author Alexander Wert
-	 * @author Michael Derevyanko (minor changes and improvements)
-	 */
 	interface Tags {
 		/**
 		 * Request name tag.
@@ -55,11 +41,6 @@ public interface RequestMeasurement {
 		String ERROR_RESPONSE_BODY = "errorResponseBody";
 	}
 
-	/**
-	 * Fields.
-	 *
-	 * @author Alexander Wert
-	 */
 	interface Fields {
 		/**
 		 * Response time field.

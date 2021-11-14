@@ -1,9 +1,5 @@
 package org.ifisolution.measures.metrics;
 
-/**
- * Constants (Tag, Field, Measurement) names for the virtual users measurement.
-  * @author Alexander Wert
- */
 public interface VirtualUsersMeasurement {
 
 	/**
@@ -11,11 +7,6 @@ public interface VirtualUsersMeasurement {
 	 */
 	String MEASUREMENT_NAME = "virtualUsers";
 
-	/**
-	 * Tags.
-	 * 
-	 * @author Alexander Wert
-	 */
 	interface Tags {
 		/**
 		 * Node name field
@@ -27,11 +18,6 @@ public interface VirtualUsersMeasurement {
 		String RUN_ID = "runId";
 	}
 
-	/**
-	 * Fields.
-	 * 
-	 * @author Alexander Wert
-	 */
 	interface Fields {
 		/**
 		 * Minimum active threads field.

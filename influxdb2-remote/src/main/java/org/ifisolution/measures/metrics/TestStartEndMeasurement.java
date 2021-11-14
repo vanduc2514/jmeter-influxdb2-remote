@@ -1,9 +1,5 @@
 package org.ifisolution.measures.metrics;
 
-/**
- * Constants (Tag, Field, Measurement) names for the measurement that denotes start and end points of a load test.
- * @author Alexander Wert
- */
 public interface TestStartEndMeasurement {
 
 	/**
@@ -11,12 +7,6 @@ public interface TestStartEndMeasurement {
 	 */
 	String MEASUREMENT_NAME = "testStartEnd";
 
-	/**
-	 * Tags.
-	 * 
-	 * @author Alexander Wert
-	 *
-	 */
 	interface Tags {
 		/**
 		 * Start or End type tag.
@@ -39,23 +29,13 @@ public interface TestStartEndMeasurement {
                 String TEST_NAME = "testName";
 	}
 	
-	/**
-	 * Fields.
-	 * 
-	 * @author Alexander Wert
-	 */
 	interface Fields {
 		/**
 		 * Test name field.
 		 */
 		String PLACEHOLDER = "placeholder";
 	}
-	
-	/**
-	 * Values.
-	 * 
-	 * @author Alexander Wert
-	 */
+
 	interface Values {
 		/**
 		 * Finished.

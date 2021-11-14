@@ -22,9 +22,8 @@ import org.ifisolution.measures.InfluxTestResultMeasure;
 import org.ifisolution.measures.impl.TestResultMeasureManager;
 
 import java.io.ObjectStreamException;
-import java.io.Serializable;
 
-public class InfluxSampleSender extends BatchSampleSender implements Serializable {
+public class InfluxSampleSender extends BatchSampleSender {
 
     private static final long serialVersionUID = 3371144997364645511L;
 

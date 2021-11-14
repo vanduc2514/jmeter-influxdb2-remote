@@ -1,9 +1,5 @@
 package org.ifisolution.util;
 
-import com.influxdb.client.write.Point;
-
-import java.util.concurrent.TimeUnit;
-
 public class MeasureUtil {
 
     public static final int SCALE = 1000;
