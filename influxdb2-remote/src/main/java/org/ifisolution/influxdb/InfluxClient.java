@@ -56,7 +56,6 @@ public class InfluxClient {
             throw new PluginException(e);
         }
         influxClient.checkHealth();
-//        influxClient.verifyBucketAuthorization(bucketName);
         return influxClient;
     }
 
@@ -73,19 +72,6 @@ public class InfluxClient {
         }
         LOGGER.info("Influx Database health status: {}", healthStatus);
     }
-
-//    private void verifyBucketAuthorization(String bucketName) throws PluginException {
-//        LOGGER.info("Verifying Authorization to Bucket \"{}\"", bucketName);
-//        try {
-//            Bucket bucket = actualClient.getBucketsApi().findBucketByName(bucketName);
-//            if (bucket == null) {
-//                throw new PluginException("Cannot authorize Bucket");
-//            }
-//            LOGGER.info("Authorized to Influx Bucket {}", bucket.toString().replaceAll("^.*?(?=\\{)", "\n"));
-//        } catch (UnauthorizedException e) {
-//            throw new PluginException(e);
-//        }
-//    }
 
     /**
      * Write values to influx Database
