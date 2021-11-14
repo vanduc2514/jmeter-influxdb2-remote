@@ -67,9 +67,15 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
         this.influxClient.writeInfluxPoint(resultPoint);
     }
 
+<<<<<<< HEAD
     private boolean hasErrorResponseCode(SampleResult sampleResult) {
         char responseCategory = sampleResult.getResponseCode().charAt(0);
         return responseCategory == '4' || responseCategory == '5';
+=======
+    private boolean hasSuccessfulOrResponseCode(SampleResult sampleResult) {
+        char responseCategory = sampleResult.getResponseCode().charAt(0);
+        return responseCategory == '2' || responseCategory == '3';
+>>>>>>> 26a2fc5e9118ffe8f2d4c07a3cd878f355005ceb
     }
 
     /**
