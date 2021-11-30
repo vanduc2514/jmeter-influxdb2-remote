@@ -21,7 +21,6 @@ RUN wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-$JMETER_V
 WORKDIR $JMETER_HOME
 RUN wget -O "lib/cmdrunner-2.2.jar" https://repo1.maven.org/maven2/kg/apc/cmdrunner/2.2/cmdrunner-2.2.jar && \
     wget -O "lib/ext/jmeter-plugins-manager-1.6.jar" https://repo1.maven.org/maven2/kg/apc/jmeter-plugins-manager/1.6/jmeter-plugins-manager-1.6.jar && \
-    wget -O "lib/ext/jmeter-junit-xml-converter-0.0.1-SNAPSHOT-jar-with-dependencies.jar" https://docs.getxray.app/download/attachments/62262689/jmeter-junit-xml-converter-0.0.1-SNAPSHOT-jar-with-dependencies.jar && \
     java -cp lib/ext/jmeter-plugins-manager-1.6.jar org.jmeterplugins.repository.PluginManagerCMDInstaller
 
 # Install required plugins
