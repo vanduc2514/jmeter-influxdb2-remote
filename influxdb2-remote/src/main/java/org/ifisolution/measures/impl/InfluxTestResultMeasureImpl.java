@@ -33,6 +33,8 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
         String failureMessage = sampleResult.getFirstAssertionFailureMessage();
         boolean errorOccurred = failureMessage != null;
 
+//        sampleResult.err
+
         Point resultPoint = Point.measurement(RequestMeasurement.MEASUREMENT_NAME);
 
         if (errorOccurred) {

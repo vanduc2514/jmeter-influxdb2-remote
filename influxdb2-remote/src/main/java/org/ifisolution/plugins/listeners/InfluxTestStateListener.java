@@ -48,12 +48,11 @@ public class InfluxTestStateListener extends AbstractBackendListenerClient {
             }
         });
 
-        allResults.forEach(res -> {
-            getUserMetrics().add(res);
-            if (testStateMeasure != null) {
-                testResultMeasure.writeTestResult(res);
-            }
-        });
+        allResults.forEach(res -> getUserMetrics().add(res));
+
+        if (testResultMeasure != null) {
+            allResults.forEach(res -> testResultMeasure.writeTestResult(res));
+        }
 
     }
 
@@ -81,6 +80,8 @@ public class InfluxTestStateListener extends AbstractBackendListenerClient {
         LOGGER.info("Acquired Influx Client to {}", influxClient.getHostName());
         testStateMeasure = new InfluxTestStateMeasureImpl(influxClient, propertiesProvider);
         if (standaloneMode) {
+            LOGGER.info("Using Standalone Mode with master. In this mode, " +
+                    "the test state and test result metric will be sent using only master machine");
             testResultMeasure = new InfluxTestResultMeasureImpl(influxClient, propertiesProvider);
             measureSubResult = propertiesProvider.measureSubResult();
         }
