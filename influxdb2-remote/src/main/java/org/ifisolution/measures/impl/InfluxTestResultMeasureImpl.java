@@ -8,7 +8,6 @@ import org.ifisolution.measures.InfluxTestResultMeasure;
 import org.ifisolution.measures.metrics.RequestMeasurement;
 import org.ifisolution.util.MeasureUtil;
 
-import java.net.HttpURLConnection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implements InfluxTestResultMeasure {
@@ -33,6 +32,8 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
         long connectTime = sampleResult.getConnectTime();
         String failureMessage = sampleResult.getFirstAssertionFailureMessage();
         boolean errorOccurred = failureMessage != null || hasErrorResponseCode(sampleResult);
+
+//        sampleResult.err
 
         Point resultPoint = Point.measurement(RequestMeasurement.MEASUREMENT_NAME);
 
