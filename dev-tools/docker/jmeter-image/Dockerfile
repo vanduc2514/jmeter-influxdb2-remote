@@ -16,9 +16,6 @@ RUN wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-$JMETER_V
     tar -xzf apache-jmeter-$JMETER_VERSION.tgz && \
     rm apache-jmeter-$JMETER_VERSION.tgz
 
-# Install jmeter plugin
-RUN wget -O "lib/ext/jmeter-influxdb2-remote-1.4.jar" https://github.com/vanduc2514/jmeter-influxdb2-remote/releases/download/v1.4/jmeter-influxdb2-remote-1.4.jar
-
 # Enable debug
 ENV JVM_ARGS -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000
 
