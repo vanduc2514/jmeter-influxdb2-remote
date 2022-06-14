@@ -6,6 +6,7 @@ import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.visualizers.backend.UserMetric;
 import org.ifisolution.influxdb.InfluxClient;
 import org.ifisolution.measures.InfluxTestStateMeasure;
+import org.ifisolution.measures.MeasureConfigurationProvider;
 import org.ifisolution.measures.metrics.TestStartEndMeasurement;
 import org.ifisolution.measures.metrics.VirtualUsersMeasurement;
 import org.ifisolution.util.MeasureUtil;

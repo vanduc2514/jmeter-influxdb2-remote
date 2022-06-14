@@ -13,4 +13,9 @@ public interface InfluxTestResultMeasure extends InfluxMeasure {
      */
     void writeTestResult(SampleResult sampleEvent);
 
+    /**
+     * @return true if the {@link MeasureConfigurationProvider#measureSubResult()} property is set
+     */
+    boolean measureSubResult();
+
 }

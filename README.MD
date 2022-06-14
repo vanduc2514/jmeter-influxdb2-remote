@@ -7,9 +7,6 @@ Test Result will be sent back to the master machine using Batch Mode.
 
 ![jmeter_remote](https://github.com/vanduc2514/jmeter-influxdb2-remote/raw/master/image/jmeter_slave.png)
 
-**Notice:** This plugin will overload the Influx Database if there are a lot of slave machines run in parallel.
-Since each slave machine is a client connects to Influx and constantly push data to it
-
 ## Installation
 
 Install the plugin to `${JMETER_HOME}/lib/ext` on master and each slave machine
@@ -110,8 +107,35 @@ After that, execute the test then verify it in Influx.
 
 ### Development
 
-..._To be update_
+This plugin is an extension of the existing Batch mode found in Jmeter Remote testing. It is developed based on Custom 
+implementation of [Sender mode](https://jmeter.apache.org/usermanual/remote-test.html#sendermode).
+
+![InfluxTestStateListener](./image/InfluxTestStateListener_setupTest._sequence.png)
+
+At test start, master Jmeter machine invokes ``setupTest()`` from ``InfluxTestStateListener`` to write **Start State** 
+Point to Influx using ``InfluxTestStateMeasure``. Then it creates a ``ScheduledExecutorService`` to gradually write the 
+**User Metric** Point to Influx. After that, the test plan is sent to remote Jmeter machines for execution.
+
+![InfluxSampleSender](./image/InfluxSampleSender_sampleOccurred_sequence.png)
+
+When remote Jmeter machine receives a sample from the test case, it invokes ``sampleOcurred()`` from the custom implementation
+``InfluxSampleSender``. Then``InfluxTestResultMeasure`` writes **Test Result** Point to Influx. If ``measure sub result`` 
+is enabled, this sender will populate the sub result from the sample, and also writes the result to Influx.
+
+After that this ``InfluxSampleSender`` invokes ``sampleOcurred()`` in the super ``BatchModeSender`` to send sample back
+to master Jmeter machine. If ``master_send_result`` is enabled, then the master will send a write request to Influx 
+using the same ``InfluxTestResultMeasure`` above.
+
+![InfluxTestStateListener](./image/InfluxTestStateListener_teardownTest_sequence.png)
+
+At test end, master Jmeter machine invokes ``teardownTest()`` from ``InfluxTestStateListener`` and writes **Finish State**
+Point to Influx.
+
+See:
+[InfluxDB Java client 2](https://github.com/influxdata/influxdb-client-java)
 
 Thanks [@mderevyankoaqa](https://github.com/mderevyankoaqa), the author of
 [jmeter-influxdb2-listener-plugin](https://github.com/mderevyankoaqa/jmeter-influxdb2-listener-plugin),
 you inspired me developing this.
+
+Thanks [@Vanco](https://github.com/Vanco) for the cool [Sequence Diagram Plugin](https://github.com/Vanco/SequencePlugin)

@@ -1,4 +1,4 @@
-package org.ifisolution.measures.impl;
+package org.ifisolution.measures;
 
 public interface MeasureConfigurationProvider {
 

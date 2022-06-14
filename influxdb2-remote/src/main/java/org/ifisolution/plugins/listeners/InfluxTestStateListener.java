@@ -41,19 +41,19 @@ public class InfluxTestStateListener extends AbstractBackendListenerClient {
     @Override
     public void handleSampleResults(List<SampleResult> sampleResults, BackendListenerContext context) {
         List<SampleResult> allResults = new ArrayList<>();
-        sampleResults.forEach(res -> {
+
+        for (SampleResult res : sampleResults) {
             allResults.add(res);
             if (measureSubResult) {
                 Collections.addAll(allResults, res.getSubResults());
             }
-        });
-
-        allResults.forEach(res -> getUserMetrics().add(res));
-
-        if (testResultMeasure != null) {
-            allResults.forEach(res -> testResultMeasure.writeTestResult(res));
         }
-
+        for (SampleResult res : allResults) {
+            getUserMetrics().add(res);
+            if (testResultMeasure != null) {
+                testResultMeasure.writeTestResult(res);
+            }
+        }
     }
 
     @Override
@@ -64,7 +64,12 @@ public class InfluxTestStateListener extends AbstractBackendListenerClient {
             testStateMeasure.writeStartState();
             // Constantly write virtual user with an interval of 5 seconds
             scheduler.scheduleAtFixedRate(
-                    () -> testStateMeasure.writeUserMetric(getUserMetrics()),
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            testStateMeasure.writeUserMetric(getUserMetrics());
+                        }
+                    },
                     1, VIRTUAL_USER_INTERVAL, TimeUnit.SECONDS
             );
         } catch (PluginException e) {

@@ -3,7 +3,7 @@ package org.ifisolution.configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.util.JMeterUtils;
 import org.ifisolution.influxdb.InfluxConfigurationProvider;
-import org.ifisolution.measures.impl.MeasureConfigurationProvider;
+import org.ifisolution.measures.MeasureConfigurationProvider;
 
 import static org.ifisolution.configuration.JmeterProperties.*;
 

@@ -1,6 +1,7 @@
 package org.ifisolution.measures.impl;
 
 import org.ifisolution.influxdb.InfluxClient;
+import org.ifisolution.measures.MeasureConfigurationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

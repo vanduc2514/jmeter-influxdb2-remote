@@ -5,6 +5,7 @@ import com.influxdb.client.write.Point;
 import org.apache.jmeter.samplers.SampleResult;
 import org.ifisolution.influxdb.InfluxClient;
 import org.ifisolution.measures.InfluxTestResultMeasure;
+import org.ifisolution.measures.MeasureConfigurationProvider;
 import org.ifisolution.measures.metrics.RequestMeasurement;
 import org.ifisolution.util.MeasureUtil;
 
@@ -14,16 +15,16 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
 
     private final AtomicBoolean isClientClosed;
 
-    private boolean saveErrorResponse;
+    private final boolean saveErrorResponse;
+
+    private final boolean measureSubResult;
 
     public InfluxTestResultMeasureImpl(InfluxClient influxClient,
                                        MeasureConfigurationProvider configurationProvider) {
         super(influxClient, configurationProvider);
         isClientClosed = new AtomicBoolean(false);
-    }
-
-    public void setSaveErrorResponse(boolean saveErrorResponse) {
-        this.saveErrorResponse = saveErrorResponse;
+        measureSubResult = configurationProvider.measureSubResult();
+        saveErrorResponse = configurationProvider.provideSaveErrorResponseOption();
     }
 
     @Override
@@ -32,8 +33,6 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
         long connectTime = sampleResult.getConnectTime();
         String failureMessage = sampleResult.getFirstAssertionFailureMessage();
         boolean errorOccurred = failureMessage != null || hasErrorResponseCode(sampleResult);
-
-//        sampleResult.err
 
         Point resultPoint = Point.measurement(RequestMeasurement.MEASUREMENT_NAME);
 
@@ -94,6 +93,11 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
         if (!isClientClosed.getAndSet(true)) {
             super.closeInfluxConnection();
         }
+    }
+
+    @Override
+    public boolean measureSubResult() {
+        return measureSubResult;
     }
 
 }

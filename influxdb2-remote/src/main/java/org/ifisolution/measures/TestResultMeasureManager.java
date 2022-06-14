@@ -1,10 +1,10 @@
-package org.ifisolution.measures.impl;
+package org.ifisolution.measures;
 
 import org.ifisolution.configuration.InfluxPropertiesProvider;
 import org.ifisolution.exeptions.PluginException;
 import org.ifisolution.influxdb.InfluxClient;
 import org.ifisolution.influxdb.InfluxClientConfiguration;
-import org.ifisolution.measures.InfluxTestResultMeasure;
+import org.ifisolution.measures.impl.InfluxTestResultMeasureImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,8 +23,6 @@ public class TestResultMeasureManager {
 
     private CountDownLatch configureLatch;
 
-    private boolean measureSubResult;
-
     private TestResultMeasureManager() {
     }
 
@@ -39,7 +37,6 @@ public class TestResultMeasureManager {
         }
         INSTANCE.beingConfigured = new AtomicBoolean(false);
         INSTANCE.configureLatch = new CountDownLatch(1);
-        INSTANCE.measureSubResult = false;
         return INSTANCE;
     }
 
@@ -71,9 +68,7 @@ public class TestResultMeasureManager {
                         new InfluxClientConfiguration(propertiesProvider)
                 );
                 LOGGER.info("Acquired Influx Client to {}", influxClient.getHostName());
-                measureSubResult = propertiesProvider.measureSubResult();
                 testResultMeasure = new InfluxTestResultMeasureImpl(influxClient, propertiesProvider);
-                testResultMeasure.setSaveErrorResponse(propertiesProvider.provideSaveErrorResponseOption());
             } finally {
                 configureLatch.countDown();
             }
@@ -83,12 +78,4 @@ public class TestResultMeasureManager {
         }
     }
 
-    /**
-     * Return the Property Configuration passed when execute test
-     *
-     * @return true if measure Sub Result
-     */
-    public boolean measureSubResult() {
-        return measureSubResult;
-    }
 }

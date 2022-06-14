@@ -19,7 +19,7 @@ package org.ifisolution.plugins.samplers;
 
 import org.apache.jmeter.samplers.*;
 import org.ifisolution.measures.InfluxTestResultMeasure;
-import org.ifisolution.measures.impl.TestResultMeasureManager;
+import org.ifisolution.measures.TestResultMeasureManager;
 
 import java.io.ObjectStreamException;
 
@@ -51,7 +51,7 @@ public class InfluxSampleSender extends BatchSampleSender {
         InfluxTestResultMeasure testResultMeasure = measureManager.getInfluxMeasure();
         if (testResultMeasure != null) {
             testResultMeasure.writeTestResult(e.getResult());
-            if (measureManager.measureSubResult()) {
+            if (testResultMeasure.measureSubResult()) {
                 SampleResult[] subResults = e.getResult().getSubResults();
                 for (SampleResult subResult : subResults) {
                     testResultMeasure.writeTestResult(subResult);
