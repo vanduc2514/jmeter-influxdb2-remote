@@ -20,6 +20,8 @@ package org.ifisolution.plugins.samplers;
 import org.apache.jmeter.samplers.*;
 import org.ifisolution.measures.InfluxTestResultMeasure;
 import org.ifisolution.measures.TestResultMeasureManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ObjectStreamException;
 
@@ -28,6 +30,8 @@ public class InfluxSampleSender extends BatchSampleSender {
     private static final long serialVersionUID = 3371144997364645511L;
 
     private transient TestResultMeasureManager measureManager;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(InfluxSampleSender.class.getSimpleName());
 
     /**
      * This constructor is invoked through reflection found in {@link SampleSenderFactory}
@@ -47,7 +51,7 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     @Override
     public void sampleOccurred(SampleEvent e) {
-        // The Jmeter properties sent from master is propagated at this point.
+        // The Jmeter properties sent from master is propagated at this method.
         InfluxTestResultMeasure testResultMeasure = measureManager.getInfluxMeasure();
         if (testResultMeasure != null) {
             testResultMeasure.writeTestResult(e.getResult());
@@ -57,6 +61,9 @@ public class InfluxSampleSender extends BatchSampleSender {
                     testResultMeasure.writeTestResult(subResult);
                 }
             }
+        } else {
+            LOGGER.warn("No {} is configured. This remote machine does not send Test Result Point to Influx",
+                    InfluxTestResultMeasure.class.getSimpleName());
         }
         super.sampleOccurred(e);
     }
