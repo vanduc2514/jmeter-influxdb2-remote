@@ -18,6 +18,7 @@
 package org.ifisolution.plugins.samplers;
 
 import org.apache.jmeter.samplers.*;
+import org.ifisolution.configuration.InfluxPropertiesProvider;
 import org.ifisolution.measures.InfluxTestResultMeasure;
 import org.ifisolution.measures.TestResultMeasureManager;
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     @Override
     public void testEnded(String host) {
-        InfluxTestResultMeasure testResultMeasure = measureManager.getInfluxMeasure();
+        InfluxTestResultMeasure testResultMeasure = measureManager.getInfluxMeasure(new InfluxPropertiesProvider());
         if (testResultMeasure != null) {
             testResultMeasure.closeInfluxConnection();
         }
@@ -52,7 +53,7 @@ public class InfluxSampleSender extends BatchSampleSender {
     @Override
     public void sampleOccurred(SampleEvent e) {
         // The Jmeter properties sent from master is propagated at this method.
-        InfluxTestResultMeasure testResultMeasure = measureManager.getInfluxMeasure();
+        InfluxTestResultMeasure testResultMeasure = measureManager.getInfluxMeasure(new InfluxPropertiesProvider());
         if (testResultMeasure != null) {
             testResultMeasure.writeTestResult(e.getResult());
             if (testResultMeasure.measureSubResult()) {

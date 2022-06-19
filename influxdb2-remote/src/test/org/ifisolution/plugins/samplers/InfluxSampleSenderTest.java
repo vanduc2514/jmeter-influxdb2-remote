@@ -3,6 +3,7 @@ package org.ifisolution.plugins.samplers;
 import org.apache.jmeter.samplers.RemoteSampleListener;
 import org.apache.jmeter.samplers.SampleEvent;
 import org.apache.jmeter.samplers.SampleResult;
+import org.ifisolution.configuration.InfluxPropertiesProvider;
 import org.ifisolution.measures.InfluxTestResultMeasure;
 import org.ifisolution.measures.TestResultMeasureManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +48,7 @@ class InfluxSampleSenderTest {
     @BeforeEach
     public void setupBehaviorMockSampleEvent() {
         when(mockSampleEvent.getResult()).thenReturn(mockSampleResult);
-        when(measureManager.getInfluxMeasure()).thenReturn(testResultMeasure);
+        when(measureManager.getInfluxMeasure(any(InfluxPropertiesProvider.class))).thenReturn(testResultMeasure);
     }
 
     @Test

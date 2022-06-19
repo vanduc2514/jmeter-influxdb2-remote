@@ -48,9 +48,9 @@ public class TestResultMeasureManager {
      * @return an implementation of {@link InfluxTestResultMeasure} or null if the
      * {@link InfluxClient} cannot be initialized.
      */
-    public InfluxTestResultMeasure getInfluxMeasure() {
+    public InfluxTestResultMeasure getInfluxMeasure(InfluxPropertiesProvider propertiesProvider) {
         try {
-            initializeInfluxMeasureBlock();
+            initializeInfluxMeasureBlock(propertiesProvider);
         } catch (PluginException | InterruptedException e) {
             LOGGER.error("Could not create {}. Reason: {}",
                     InfluxTestResultMeasure.class.getSimpleName() , e.getMessage());
@@ -59,14 +59,13 @@ public class TestResultMeasureManager {
         return testResultMeasure;
     }
 
-    private void initializeInfluxMeasureBlock() throws PluginException, InterruptedException {
+    private void initializeInfluxMeasureBlock(InfluxPropertiesProvider propertiesProvider) throws PluginException, InterruptedException {
         if (!beingConfigured.getAndSet(true)) {
             // Runs only once
-            InfluxPropertiesProvider propertiesProvider = new InfluxPropertiesProvider();
             try {
                 InfluxClient influxClient = InfluxClient.buildClient(
                         new InfluxClientConfiguration(propertiesProvider)
-                );
+                ); // TODO: How to unify this for both measure ??
                 LOGGER.info("Acquired Influx Client to {}", influxClient.getHostName());
                 testResultMeasure = new InfluxTestResultMeasureImpl(influxClient, propertiesProvider);
             } finally {
