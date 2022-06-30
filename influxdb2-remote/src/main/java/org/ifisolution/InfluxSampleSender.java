@@ -15,23 +15,27 @@
  * limitations under the License.
  */
 
-package org.ifisolution.plugins.samplers;
+package org.ifisolution;
 
 import org.apache.jmeter.samplers.BatchSampleSender;
 import org.apache.jmeter.samplers.RemoteSampleListener;
 import org.apache.jmeter.samplers.SampleEvent;
 import org.apache.jmeter.samplers.SampleSenderFactory;
 import org.apache.jmeter.util.JMeterUtils;
+import org.apache.jmeter.visualizers.backend.UserMetric;
 import org.ifisolution.configuration.ClientProperties;
 import org.ifisolution.configuration.MeasureSettings;
 import org.ifisolution.influxdb.InfluxClient;
 import org.ifisolution.influxdb.InfluxClientException;
+import org.ifisolution.measures.TestMeasureManager;
 import org.ifisolution.measures.TestResultMeasure;
-import org.ifisolution.measures.impl.TestResultMeasureImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ObjectStreamException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class InfluxSampleSender extends BatchSampleSender {
 
@@ -58,7 +62,17 @@ public class InfluxSampleSender extends BatchSampleSender {
     private boolean saveErrorResponse;
 
     // field that is initialized from the server instance
-    private transient TestResultMeasure testResultMeasure;
+    private transient TestMeasureManager measureManager;
+
+    public static final int SCHEDULER_THREAD_POOL_SIZE = 1;
+
+    public static final int VIRTUAL_USER_INTERVAL = 5;
+
+    private transient ScheduledExecutorService scheduler;
+
+    private transient UserMetric userMetric;
+
+    private transient final Object LOCK = new Object();
 
     /**
      * This constructor is invoked through reflection found in {@link SampleSenderFactory}
@@ -78,16 +92,31 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     @Override
     public void testEnded(String host) {
-        if (testResultMeasure != null) {
-            testResultMeasure.closeInfluxConnection();
+        if (measureManager != null && scheduler != null) {
+            measureManager.writeTestEnded();
+            synchronized (LOCK) {
+                if (userMetric.getFinishedThreads() == 0) {
+                    scheduler.shutdown();
+                    try {
+                        boolean terminated = scheduler.awaitTermination(30, TimeUnit.SECONDS);
+                        if (terminated) {
+                            LOGGER.info("influxDB scheduler terminated!");
+                        }
+                    } catch (InterruptedException e) {
+                        LOGGER.error("Error waiting for end of scheduler", e);
+                        Thread.currentThread().interrupt();
+                    }
+                    measureManager.closeInfluxClient();
+                }
+            }
         }
         super.testEnded(host);
     }
 
     @Override
     public void sampleOccurred(SampleEvent e) {
-        if (testResultMeasure != null) {
-            testResultMeasure.writeTestResult(e.getResult());
+        if (measureManager != null) {
+            measureManager.writeTestResult(e.getResult());
         } else {
             LOGGER.warn("No {} is configured. This remote machine does not send Test Result Point to Influx",
                     TestResultMeasure.class.getSimpleName());
@@ -99,8 +128,7 @@ public class InfluxSampleSender extends BatchSampleSender {
      * Processed by the RMI server code; acts as testStarted().
      *
      * @return this
-     * @throws ObjectStreamException
-     *             never
+     * @throws ObjectStreamException never
      */
     private Object readResolve() throws ObjectStreamException {
         String hostName = JMeterUtils.getLocalHostName();
@@ -113,26 +141,41 @@ public class InfluxSampleSender extends BatchSampleSender {
         }
         logFields();
 
-        try {
-            MeasureSettings measureSettings = MeasureSettings.builder()
+        synchronized (LOCK) {
+            if (measureManager == null) {
+                try {
+                    bootstrapMeasureManager(hostName);
+                    scheduler = Executors.newScheduledThreadPool(SCHEDULER_THREAD_POOL_SIZE);
+                    measureManager.writeTestStarted();
+                    userMetric = new UserMetric();
+                    scheduler.scheduleAtFixedRate(
+                            () -> measureManager.writeUserMetric(userMetric),
+                            1, VIRTUAL_USER_INTERVAL, TimeUnit.SECONDS
+                    );
+                } catch (InfluxClientException e) {
+                    LOGGER.error(e.getMessage());
+                }
+            }
+        }
+
+        return this;
+    }
+
+    private void bootstrapMeasureManager(String hostName) throws InfluxClientException {
+        MeasureSettings measureSettings = MeasureSettings.builder()
                 .hostName(hostName)
                 .testName(testName)
                 .testRunId(testRunId)
                 .measureSubResult(measureSubResult)
                 .saveErrorResponse(saveErrorResponse)
                 .build();
-            InfluxClient influxClient = InfluxClient.builder()
-                    .connectionUrl(influxConnectionUrl)
-                    .token(influxToken)
-                    .organization(influxOrganizationName)
-                    .bucket(influxBucketName)
-                    .build();
-            testResultMeasure = new TestResultMeasureImpl(influxClient, measureSettings);
-        } catch (InfluxClientException e) {
-            LOGGER.error(e.getMessage());
-        }
-
-        return this;
+        InfluxClient influxClient = InfluxClient.builder()
+                .connectionUrl(influxConnectionUrl)
+                .token(influxToken)
+                .organization(influxOrganizationName)
+                .bucket(influxBucketName)
+                .build();
+        measureManager = TestMeasureManager.createManager(influxClient, measureSettings);
     }
 
     private void initializedFields() {

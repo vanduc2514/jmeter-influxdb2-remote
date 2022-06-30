@@ -5,7 +5,7 @@ import org.apache.jmeter.visualizers.backend.UserMetric;
 import org.ifisolution.measures.metrics.TestStartEndMeasurement;
 import org.ifisolution.measures.metrics.VirtualUsersMeasurement;
 
-public interface InfluxTestStateMeasure extends InfluxMeasure {
+public interface TestStateMeasure extends InfluxMeasure {
 
     /**
      * Write the {@link TestStartEndMeasurement} metric to Influx Database.

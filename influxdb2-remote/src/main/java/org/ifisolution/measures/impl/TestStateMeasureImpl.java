@@ -6,14 +6,14 @@ import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.visualizers.backend.UserMetric;
 import org.ifisolution.configuration.MeasureSettings;
 import org.ifisolution.influxdb.InfluxClient;
-import org.ifisolution.measures.InfluxTestStateMeasure;
 import org.ifisolution.measures.MeasureHelper;
+import org.ifisolution.measures.TestStateMeasure;
 import org.ifisolution.measures.metrics.TestStartEndMeasurement;
 import org.ifisolution.measures.metrics.VirtualUsersMeasurement;
 
-public class InfluxTestStateMeasureImpl extends AbstractInfluxMeasure implements InfluxTestStateMeasure {
+public class TestStateMeasureImpl extends AbstractInfluxMeasure implements TestStateMeasure {
 
-    public InfluxTestStateMeasureImpl(InfluxClient influxClient, MeasureSettings measureSettings) {
+    public TestStateMeasureImpl(InfluxClient influxClient, MeasureSettings measureSettings) {
         super(influxClient, measureSettings);
     }
 

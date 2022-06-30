@@ -60,6 +60,8 @@ public class InfluxClient {
 
     public void closeClient() {
         try {
+            singletonWriteApi.flush();
+            this.singletonWriteApi.close();
             this.actualClient.close();
         } catch (InfluxException e) {
             LOGGER.error(e.getMessage());
