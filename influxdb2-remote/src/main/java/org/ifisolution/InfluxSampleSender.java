@@ -72,7 +72,7 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     private transient UserMetric userMetric;
 
-    private transient final Object LOCK = new Object();
+    private static final Object LOCK = new Object();
 
     /**
      * This constructor is invoked through reflection found in {@link SampleSenderFactory}

@@ -1,4 +1,4 @@
-FROM openjdk:11.0.4-jre-slim
+FROM eclipse-temurin:11.0.15_10-jre-jammy
 
 ARG JMETER_VERSION
 

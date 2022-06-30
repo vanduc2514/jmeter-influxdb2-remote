@@ -23,19 +23,19 @@ public class InfluxClientBuilder {
     }
 
     public InfluxClientBuilder token(String token) {
-        validateStringValue("token", token);
+        validateStringValue("influxToken", token);
         influxToken = token;
         return this;
     }
 
     public InfluxClientBuilder organization(String organization) {
-        validateStringValue("organization", organization);
+        validateStringValue("influxOrganizationName", organization);
         influxOrganizationName = organization;
         return this;
     }
 
     public InfluxClientBuilder bucket(String bucket) {
-        validateStringValue("bucket", bucket);
+        validateStringValue("influxBucketName", bucket);
         influxBucketName = bucket;
         return this;
     }
