@@ -3,15 +3,15 @@ package org.ifisolution.measures.impl;
 import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
 import org.apache.jmeter.samplers.SampleResult;
+import org.ifisolution.configuration.MeasureSettings;
 import org.ifisolution.influxdb.InfluxClient;
-import org.ifisolution.measures.InfluxTestResultMeasure;
-import org.ifisolution.measures.MeasureConfigurationProvider;
+import org.ifisolution.measures.MeasureHelper;
+import org.ifisolution.measures.TestResultMeasure;
 import org.ifisolution.measures.metrics.RequestMeasurement;
-import org.ifisolution.util.MeasureUtil;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implements InfluxTestResultMeasure {
+public class TestResultMeasureImpl extends AbstractInfluxMeasure implements TestResultMeasure {
 
     private final AtomicBoolean isClientClosed;
 
@@ -19,12 +19,12 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
 
     private final boolean measureSubResult;
 
-    public InfluxTestResultMeasureImpl(InfluxClient influxClient,
-                                       MeasureConfigurationProvider configurationProvider) {
-        super(influxClient, configurationProvider);
+    public TestResultMeasureImpl(InfluxClient influxClient,
+                                       MeasureSettings measureSettings) {
+        super(influxClient, measureSettings);
         isClientClosed = new AtomicBoolean(false);
-        measureSubResult = configurationProvider.measureSubResult();
-        saveErrorResponse = configurationProvider.provideSaveErrorResponseOption();
+        measureSubResult = measureSettings.isMeasureSubResult();
+        saveErrorResponse = measureSettings.isSaveErrorResponse();
     }
 
     @Override
@@ -49,7 +49,7 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
             }
         }
 
-        resultPoint.time(MeasureUtil.getCurrentTimeNanoSecond(), WritePrecision.NS)
+        resultPoint.time(MeasureHelper.getCurrentTimeNanoSecond(), WritePrecision.NS)
                 .addTag(RequestMeasurement.Tags.TEST_NAME, testName)
                 .addTag(RequestMeasurement.Tags.RUN_ID, runId)
                 .addTag(RequestMeasurement.Tags.REQUEST_NAME, sampleResult.getSampleLabel())
@@ -65,6 +65,15 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
                 .addField(RequestMeasurement.Fields.PROCESSING_TIME, latency - connectTime);
 
         this.influxClient.writeInfluxPoint(resultPoint);
+
+        if (measureSubResult) {
+            SampleResult[] subResults = sampleResult.getSubResults();
+            if (subResults == null || subResults.length == 0) return; //Break from recursion
+            for (SampleResult subResult : subResults) {
+                writeTestResult(subResult);
+            }
+        }
+
     }
 
     private boolean hasErrorResponseCode(SampleResult sampleResult) {
@@ -93,11 +102,6 @@ public class InfluxTestResultMeasureImpl extends AbstractInfluxMeasure implement
         if (!isClientClosed.getAndSet(true)) {
             super.closeInfluxConnection();
         }
-    }
-
-    @Override
-    public boolean measureSubResult() {
-        return measureSubResult;
     }
 
 }

@@ -3,14 +3,10 @@ package org.ifisolution.plugins.listeners;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.visualizers.backend.AbstractBackendListenerClient;
 import org.apache.jmeter.visualizers.backend.BackendListenerContext;
-import org.ifisolution.configuration.InfluxPropertiesProvider;
-import org.ifisolution.exeptions.PluginException;
 import org.ifisolution.influxdb.InfluxClient;
-import org.ifisolution.influxdb.InfluxClientConfiguration;
-import org.ifisolution.measures.InfluxTestResultMeasure;
+import org.ifisolution.influxdb.InfluxClientException;
 import org.ifisolution.measures.InfluxTestStateMeasure;
-import org.ifisolution.measures.impl.InfluxTestResultMeasureImpl;
-import org.ifisolution.measures.impl.InfluxTestStateMeasureImpl;
+import org.ifisolution.measures.TestResultMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +26,7 @@ public class InfluxTestStateListener extends AbstractBackendListenerClient {
 
     private InfluxTestStateMeasure testStateMeasure;
 
-    private InfluxTestResultMeasure testResultMeasure;
+    private TestResultMeasure testResultMeasure;
 
     private InfluxClient influxClient;
 
@@ -72,24 +68,24 @@ public class InfluxTestStateListener extends AbstractBackendListenerClient {
                     },
                     1, VIRTUAL_USER_INTERVAL, TimeUnit.SECONDS
             );
-        } catch (PluginException e) {
+        } catch (InfluxClientException e) {
             LOGGER.error("Could not create {}. Reason: {}",
                     InfluxTestStateMeasure.class.getSimpleName(), e.getMessage());
         }
     }
 
-    private void boostrapMeasure() throws PluginException {
-        InfluxPropertiesProvider propertiesProvider = new InfluxPropertiesProvider();
-        boolean standaloneMode = propertiesProvider.isStandalone();
-        influxClient = InfluxClient.buildClient(new InfluxClientConfiguration(propertiesProvider));
-        LOGGER.info("Acquired Influx Client to {}", influxClient.getHostName());
-        testStateMeasure = new InfluxTestStateMeasureImpl(influxClient, propertiesProvider);
-        if (standaloneMode) {
-            LOGGER.info("Using Standalone Mode with master. In this mode, " +
-                    "the test state and test result metric will be sent using only master machine");
-            testResultMeasure = new InfluxTestResultMeasureImpl(influxClient, propertiesProvider);
-            measureSubResult = propertiesProvider.measureSubResult();
-        }
+    private void boostrapMeasure() throws InfluxClientException {
+//        ClientProperties clientProperties = new ClientProperties();
+//        boolean standaloneMode = clientProperties.isStandalone();
+//        influxClient = InfluxClient.buildClient(new InfluxClientBuilder(clientProperties));
+//        LOGGER.info("Acquired Influx Client to {}", influxClient.getUrl());
+//        testStateMeasure = new InfluxTestStateMeasureImpl(influxClient, clientProperties);
+//        if (standaloneMode) {
+//            LOGGER.info("Using Standalone Mode with master. In this mode, " +
+//                    "the test state and test result metric will be sent using only master machine");
+//            testResultMeasure = new TestResultMeasureImpl(influxClient, clientProperties);
+//            measureSubResult = clientProperties.measureSubResult();
+//        }
     }
 
     @Override

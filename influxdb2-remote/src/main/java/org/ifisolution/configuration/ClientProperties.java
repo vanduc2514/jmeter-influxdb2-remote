@@ -1,19 +1,15 @@
 package org.ifisolution.configuration;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.util.JMeterUtils;
-import org.ifisolution.influxdb.InfluxConfigurationProvider;
-import org.ifisolution.measures.MeasureConfigurationProvider;
 
 import static org.ifisolution.configuration.JmeterProperties.*;
 
-public class InfluxPropertiesProvider implements InfluxConfigurationProvider, MeasureConfigurationProvider {
+public class ClientProperties {
 
     public static final String DEFAULT_TEST_NAME = "Jmeter_TestPlan_Default";
     public static final String DEFAULT_RUN_ID = "R001";
 
-    @Override
-    public String provideConnectionUrl() {
+    public String InfluxConnectionUrl() {
         final var builder = new StringBuilder();
         boolean enableSSL = Boolean.parseBoolean(JMeterUtils.getProperty(INFLUX_SSL_ENABLE.key()));
         String hostName = JMeterUtils.getProperty(INFLUX_HOSTNAME.key());
@@ -32,52 +28,32 @@ public class InfluxPropertiesProvider implements InfluxConfigurationProvider, Me
         return builder.toString();
     }
 
-    @Override
-    public String provideToken() {
+    public String influxToken() {
         return JMeterUtils.getProperty(INFLUX_TOKEN.key());
     }
 
-    @Override
-    public String provideOrganizationName() {
+    public String influxOrganizationName() {
         return JMeterUtils.getProperty(INFLUX_ORGANIZATION.key());
     }
 
-    @Override
-    public String provideBucketName() {
+    public String influxBucketName() {
         return JMeterUtils.getProperty(INFLUX_BUCKET.key());
     }
 
-    @Override
-    public String provideTestName() {
+    public String testName() {
         return JMeterUtils.getPropDefault(TEST_NAME.key(), DEFAULT_TEST_NAME);
     }
 
-    @Override
-    public String provideRunId() {
+    public String testRunId() {
         return JMeterUtils.getPropDefault(TEST_RUN_ID.key(), DEFAULT_RUN_ID);
     }
 
-    @Override
-    public String provideHostName() {
-        return JMeterUtils.getLocalHostName();
+    public boolean saveErrorResponse() {
+        return Boolean.parseBoolean(JMeterUtils.getPropDefault(SAVE_ERROR_RESPONSE.key(), "false"));
     }
 
-    @Override
-    public boolean provideSaveErrorResponseOption() {
-        return Boolean.parseBoolean(JMeterUtils.getProperty(SAVE_ERROR_RESPONSE.key()));
-    }
-
-    @Override
-    public boolean isStandalone() {
-        return Boolean.parseBoolean(JMeterUtils.getProperty(MASTER_SEND_RESULT.key()));
-    }
-
-    @Override
     public boolean measureSubResult() {
-        String property = JMeterUtils.getProperty(MEASURE_SUB_RESULT.key());
-        if (StringUtils.isEmpty(property)) {
-            return true; // Default if empty or not set will return true
-        }
-        return Boolean.parseBoolean(property);
+        return Boolean.parseBoolean(JMeterUtils.getPropDefault(MEASURE_SUB_RESULT.key(), "false"));
     }
+
 }

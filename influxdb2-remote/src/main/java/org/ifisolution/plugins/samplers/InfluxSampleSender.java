@@ -17,9 +17,19 @@
 
 package org.ifisolution.plugins.samplers;
 
-import org.apache.jmeter.samplers.*;
-import org.ifisolution.measures.InfluxTestResultMeasure;
-import org.ifisolution.measures.TestResultMeasureManager;
+import org.apache.jmeter.samplers.BatchSampleSender;
+import org.apache.jmeter.samplers.RemoteSampleListener;
+import org.apache.jmeter.samplers.SampleEvent;
+import org.apache.jmeter.samplers.SampleSenderFactory;
+import org.apache.jmeter.util.JMeterUtils;
+import org.ifisolution.configuration.ClientProperties;
+import org.ifisolution.configuration.MeasureSettings;
+import org.ifisolution.influxdb.InfluxClient;
+import org.ifisolution.influxdb.InfluxClientException;
+import org.ifisolution.measures.TestResultMeasure;
+import org.ifisolution.measures.impl.TestResultMeasureImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ObjectStreamException;
 
@@ -27,18 +37,47 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     private static final long serialVersionUID = 3371144997364645511L;
 
-    private transient TestResultMeasureManager measureManager;
+    private static final Logger LOGGER = LoggerFactory.getLogger(InfluxSampleSender.class.getSimpleName());
+
+    // fields that are initialized from the client instance
+    // then is copied to the server instance by RMI
+    private String influxConnectionUrl;
+
+    private String influxToken;
+
+    private String influxOrganizationName;
+
+    private String influxBucketName;
+
+    private String testName;
+
+    private String testRunId;
+
+    private boolean measureSubResult;
+
+    private boolean saveErrorResponse;
+
+    // field that is initialized from the server instance
+    private transient TestResultMeasure testResultMeasure;
 
     /**
      * This constructor is invoked through reflection found in {@link SampleSenderFactory}
+     *
+     * <b>This constructor is called by client instance</b>
      */
     public InfluxSampleSender(RemoteSampleListener listener) {
         super(listener);
+        if (isClientConfigured()) {
+            LOGGER.info("Using InfluxSampleSender (client settings) for this run. Settings are initialized from client instance");
+            initializedFields();
+        } else {
+            LOGGER.info("Using InfluxSampleSender (server settings) for this run");
+        }
+        logFields();
     }
 
     @Override
     public void testEnded(String host) {
-        InfluxTestResultMeasure testResultMeasure = measureManager.getInfluxMeasure();
         if (testResultMeasure != null) {
             testResultMeasure.closeInfluxConnection();
         }
@@ -47,26 +86,72 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     @Override
     public void sampleOccurred(SampleEvent e) {
-        // The Jmeter properties sent from master is propagated at this point.
-        InfluxTestResultMeasure testResultMeasure = measureManager.getInfluxMeasure();
         if (testResultMeasure != null) {
             testResultMeasure.writeTestResult(e.getResult());
-            if (testResultMeasure.measureSubResult()) {
-                SampleResult[] subResults = e.getResult().getSubResults();
-                for (SampleResult subResult : subResults) {
-                    testResultMeasure.writeTestResult(subResult);
-                }
-            }
+        } else {
+            LOGGER.warn("No {} is configured. This remote machine does not send Test Result Point to Influx",
+                    TestResultMeasure.class.getSimpleName());
         }
         super.sampleOccurred(e);
     }
 
     /**
-     * Internal method called by RMI. This method acts as testStart()
+     * Processed by the RMI server code; acts as testStarted().
+     *
+     * @return this
+     * @throws ObjectStreamException
+     *             never
      */
     private Object readResolve() throws ObjectStreamException {
-        measureManager = TestResultMeasureManager.makeInstance();
+        String hostName = JMeterUtils.getLocalHostName();
+        LOGGER.info("Configure InfluxSampleSender @ {}", hostName);
+        if (isClientConfigured()) {
+            LOGGER.info("Using InfluxSampleSender (client settings) for this run. Settings are copied from client instance");
+        } else {
+            LOGGER.info("Using InfluxSampleSender (server settings) for this run. Settings are initialized from server instance");
+            initializedFields();
+        }
+        logFields();
+
+        try {
+            MeasureSettings measureSettings = MeasureSettings.builder()
+                .hostName(hostName)
+                .testName(testName)
+                .testRunId(testRunId)
+                .measureSubResult(measureSubResult)
+                .saveErrorResponse(saveErrorResponse)
+                .build();
+            InfluxClient influxClient = InfluxClient.builder()
+                    .connectionUrl(influxConnectionUrl)
+                    .token(influxToken)
+                    .organization(influxOrganizationName)
+                    .bucket(influxBucketName)
+                    .build();
+            testResultMeasure = new TestResultMeasureImpl(influxClient, measureSettings);
+        } catch (InfluxClientException e) {
+            LOGGER.error(e.getMessage());
+        }
+
         return this;
+    }
+
+    private void initializedFields() {
+        ClientProperties clientProperties = new ClientProperties();
+        influxConnectionUrl = clientProperties.InfluxConnectionUrl();
+        influxToken = clientProperties.influxToken();
+        influxOrganizationName = clientProperties.influxOrganizationName();
+        influxBucketName = clientProperties.influxBucketName();
+        testName = clientProperties.testName();
+        testRunId = clientProperties.testRunId();
+        measureSubResult = clientProperties.measureSubResult();
+        saveErrorResponse = clientProperties.saveErrorResponse();
+    }
+
+    private void logFields() {
+        LOGGER.info("InfluxDB: url={}, organization={}, bucket={}",
+                influxConnectionUrl, influxOrganizationName, influxBucketName);
+        LOGGER.info("Test: name={}, runId={}, measureSubResult={}, saveErrorResponse={}",
+                testName, testRunId, measureSubResult, saveErrorResponse);
     }
 
 }
