@@ -66,7 +66,7 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     public static final int SCHEDULER_THREAD_POOL_SIZE = 1;
 
-    public static final int VIRTUAL_USER_INTERVAL = 5;
+    public static final int VIRTUAL_USER_INTERVAL_MILLI = 1;
 
     private transient ScheduledExecutorService scheduler;
 
@@ -95,18 +95,23 @@ public class InfluxSampleSender extends BatchSampleSender {
         if (measureManager != null && scheduler != null) {
             measureManager.writeTestEnded();
             synchronized (LOCK) {
-                if (userMetric.getFinishedThreads() == 0) {
-                    scheduler.shutdown();
-                    try {
-                        boolean terminated = scheduler.awaitTermination(30, TimeUnit.SECONDS);
-                        if (terminated) {
-                            LOGGER.info("influxDB scheduler terminated!");
+                while (true) {
+                    if (userMetric.getFinishedThreads() == userMetric.getStartedThreads()) {
+                        if (!scheduler.isShutdown()) {
+                            scheduler.shutdown();
                         }
-                    } catch (InterruptedException e) {
-                        LOGGER.error("Error waiting for end of scheduler", e);
-                        Thread.currentThread().interrupt();
+                        try {
+                            boolean terminated = scheduler.awaitTermination(30, TimeUnit.SECONDS);
+                            if (terminated) {
+                                LOGGER.info("influxDB scheduler terminated!");
+                            }
+                        } catch (InterruptedException e) {
+                            LOGGER.error("Error waiting for end of scheduler", e);
+                            Thread.currentThread().interrupt();
+                        }
+                        measureManager.closeInfluxClient();
+                        break;
                     }
-                    measureManager.closeInfluxClient();
                 }
             }
         }
@@ -149,8 +154,11 @@ public class InfluxSampleSender extends BatchSampleSender {
                     measureManager.writeTestStarted();
                     userMetric = new UserMetric();
                     scheduler.scheduleAtFixedRate(
-                            () -> measureManager.writeUserMetric(userMetric),
-                            1, VIRTUAL_USER_INTERVAL, TimeUnit.SECONDS
+                            () -> {
+                                measureManager.writeUserMetric(userMetric);
+                                LOGGER.info("Writing user metric");
+                            },
+                            1, VIRTUAL_USER_INTERVAL_MILLI, TimeUnit.MILLISECONDS
                     );
                 } catch (InfluxClientException e) {
                     LOGGER.error(e.getMessage());
