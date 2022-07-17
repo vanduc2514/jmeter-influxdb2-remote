@@ -36,6 +36,8 @@ public class TestMeasureManager {
             INSTANCE.influxClient = influxClient;
             INSTANCE.testResultMeasure = new TestResultMeasureImpl(influxClient, measureSettings);
             INSTANCE.testStateMeasure = new TestStateMeasureImpl(influxClient, measureSettings);
+        }
+        if (INSTANCE.scheduler == null || INSTANCE.scheduler.isTerminated()) {
             // TODO: Extract pool size to parameter
             INSTANCE.scheduler = Executors.newScheduledThreadPool(1);
         }
