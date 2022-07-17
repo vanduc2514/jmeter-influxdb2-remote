@@ -33,9 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ObjectStreamException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class InfluxSampleSender extends BatchSampleSender {
 
@@ -64,16 +61,6 @@ public class InfluxSampleSender extends BatchSampleSender {
     // field that is initialized from the server instance
     private transient TestMeasureManager measureManager;
 
-    public static final int SCHEDULER_THREAD_POOL_SIZE = 1;
-
-    public static final int VIRTUAL_USER_INTERVAL_MILLI = 1;
-
-    private transient ScheduledExecutorService scheduler;
-
-    private transient UserMetric userMetric;
-
-    private static final Object LOCK = new Object();
-
     /**
      * This constructor is invoked through reflection found in {@link SampleSenderFactory}
      *
@@ -83,7 +70,7 @@ public class InfluxSampleSender extends BatchSampleSender {
         super(listener);
         if (isClientConfigured()) {
             LOGGER.info("Using InfluxSampleSender (client settings) for this run. Settings are initialized from client instance");
-            initializedFields();
+            initializePropertiesFromClient();
         } else {
             LOGGER.info("Using InfluxSampleSender (server settings) for this run");
         }
@@ -92,28 +79,9 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     @Override
     public void testEnded(String host) {
-        if (measureManager != null && scheduler != null) {
+        if (measureManager != null) {
             measureManager.writeTestEnded();
-            synchronized (LOCK) {
-                while (true) {
-                    if (userMetric.getFinishedThreads() == userMetric.getStartedThreads()) {
-                        if (!scheduler.isShutdown()) {
-                            scheduler.shutdown();
-                        }
-                        try {
-                            boolean terminated = scheduler.awaitTermination(30, TimeUnit.SECONDS);
-                            if (terminated) {
-                                LOGGER.info("influxDB scheduler terminated!");
-                            }
-                        } catch (InterruptedException e) {
-                            LOGGER.error("Error waiting for end of scheduler", e);
-                            Thread.currentThread().interrupt();
-                        }
-                        measureManager.closeInfluxClient();
-                        break;
-                    }
-                }
-            }
+            measureManager.closeManager();
         }
         super.testEnded(host);
     }
@@ -142,27 +110,17 @@ public class InfluxSampleSender extends BatchSampleSender {
             LOGGER.info("Using InfluxSampleSender (client settings) for this run. Settings are copied from client instance");
         } else {
             LOGGER.info("Using InfluxSampleSender (server settings) for this run. Settings are initialized from server instance");
-            initializedFields();
+            initializePropertiesFromClient();
         }
         logFields();
 
-        synchronized (LOCK) {
-            if (measureManager == null) {
-                try {
-                    bootstrapMeasureManager(hostName);
-                    scheduler = Executors.newScheduledThreadPool(SCHEDULER_THREAD_POOL_SIZE);
-                    measureManager.writeTestStarted();
-                    userMetric = new UserMetric();
-                    scheduler.scheduleAtFixedRate(
-                            () -> {
-                                measureManager.writeUserMetric(userMetric);
-                                LOGGER.info("Writing user metric");
-                            },
-                            1, VIRTUAL_USER_INTERVAL_MILLI, TimeUnit.MILLISECONDS
-                    );
-                } catch (InfluxClientException e) {
-                    LOGGER.error(e.getMessage());
-                }
+        if (measureManager == null) {
+            try {
+                bootstrapMeasureManager(hostName);
+                measureManager.writeTestStarted();
+                measureManager.writeUserMetric(new UserMetric());
+            } catch (InfluxClientException e) {
+                LOGGER.error(e.getMessage());
             }
         }
 
@@ -183,10 +141,10 @@ public class InfluxSampleSender extends BatchSampleSender {
                 .organization(influxOrganizationName)
                 .bucket(influxBucketName)
                 .build();
-        measureManager = TestMeasureManager.createManager(influxClient, measureSettings);
+        measureManager = TestMeasureManager.getManagerInstance(influxClient, measureSettings);
     }
 
-    private void initializedFields() {
+    private void initializePropertiesFromClient() {
         ClientProperties clientProperties = new ClientProperties();
         influxConnectionUrl = clientProperties.InfluxConnectionUrl();
         influxToken = clientProperties.influxToken();

@@ -9,9 +9,15 @@ import org.ifisolution.measures.impl.TestStateMeasureImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 public class TestMeasureManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestMeasureManager.class.getSimpleName());
+
+    private static TestMeasureManager INSTANCE;
 
     private InfluxClient influxClient;
 
@@ -19,14 +25,20 @@ public class TestMeasureManager {
 
     private TestStateMeasure testStateMeasure;
 
+    private ScheduledExecutorService scheduler;
+
     private TestMeasureManager() {
     }
 
-    public static TestMeasureManager createManager(InfluxClient influxClient, MeasureSettings measureSettings) {
-        TestMeasureManager INSTANCE = new TestMeasureManager();
-        INSTANCE.influxClient = influxClient;
-        INSTANCE.testResultMeasure = new TestResultMeasureImpl(influxClient, measureSettings);
-        INSTANCE.testStateMeasure = new TestStateMeasureImpl(influxClient, measureSettings);
+    public synchronized static TestMeasureManager getManagerInstance(InfluxClient influxClient, MeasureSettings measureSettings) {
+        if (INSTANCE == null) {
+            INSTANCE = new TestMeasureManager();
+            INSTANCE.influxClient = influxClient;
+            INSTANCE.testResultMeasure = new TestResultMeasureImpl(influxClient, measureSettings);
+            INSTANCE.testStateMeasure = new TestStateMeasureImpl(influxClient, measureSettings);
+            // TODO: Extract pool size to parameter
+            INSTANCE.scheduler = Executors.newScheduledThreadPool(1);
+        }
         return INSTANCE;
     }
 
@@ -43,10 +55,24 @@ public class TestMeasureManager {
     }
 
     public void writeUserMetric(UserMetric userMetric) {
-        testStateMeasure.writeUserMetric(userMetric);
+        scheduler.scheduleAtFixedRate(() -> {
+            testStateMeasure.writeUserMetric(userMetric);
+        }, 1, 100, TimeUnit.MILLISECONDS);
     }
 
-    public void closeInfluxClient() {
+    public void closeManager() {
+        if (!scheduler.isShutdown()) {
+            scheduler.shutdown();
+        }
+        try {
+            boolean terminated = scheduler.awaitTermination(30, TimeUnit.SECONDS);
+            if (terminated) {
+                LOGGER.info("influxDB scheduler terminated!");
+            }
+        } catch (InterruptedException e) {
+            LOGGER.error("Error waiting for end of scheduler", e);
+            Thread.currentThread().interrupt();
+        }
         influxClient.closeClient();
         LOGGER.info("Close InfluxClient @ {}", influxClient.getUrl());
     }
