@@ -2,14 +2,10 @@ package org.ifisolution.measures;
 
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.visualizers.backend.UserMetric;
-import org.ifisolution.configuration.MeasureSettings;
 import org.ifisolution.influxdb.InfluxClient;
-import org.ifisolution.measures.impl.TestResultMeasureImpl;
-import org.ifisolution.measures.impl.TestStateMeasureImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -17,31 +13,26 @@ public class TestMeasureManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestMeasureManager.class.getSimpleName());
 
-    private static TestMeasureManager INSTANCE;
+    private final InfluxClient influxClient;
 
-    private InfluxClient influxClient;
+    private final TestResultMeasure testResultMeasure;
 
-    private TestResultMeasure testResultMeasure;
-
-    private TestStateMeasure testStateMeasure;
+    private final TestStateMeasure testStateMeasure;
 
     private ScheduledExecutorService scheduler;
 
-    private TestMeasureManager() {
+    public TestMeasureManager(InfluxClient influxClient, TestResultMeasure testResultMeasure, TestStateMeasure testStateMeasure) {
+        this.influxClient = influxClient;
+        this.testResultMeasure = testResultMeasure;
+        this.testStateMeasure = testStateMeasure;
     }
 
-    public synchronized static TestMeasureManager getManagerInstance(InfluxClient influxClient, MeasureSettings measureSettings) {
-        if (INSTANCE == null) {
-            INSTANCE = new TestMeasureManager();
-            INSTANCE.influxClient = influxClient;
-            INSTANCE.testResultMeasure = new TestResultMeasureImpl(influxClient, measureSettings);
-            INSTANCE.testStateMeasure = new TestStateMeasureImpl(influxClient, measureSettings);
-        }
-        if (INSTANCE.scheduler == null || INSTANCE.scheduler.isTerminated()) {
-            // TODO: Extract pool size to parameter
-            INSTANCE.scheduler = Executors.newScheduledThreadPool(1);
-        }
-        return INSTANCE;
+    public void setScheduler(ScheduledExecutorService scheduler) {
+        this.scheduler = scheduler;
+    }
+
+    public ScheduledExecutorService getScheduler() {
+        return scheduler;
     }
 
     public void writeTestStarted() {

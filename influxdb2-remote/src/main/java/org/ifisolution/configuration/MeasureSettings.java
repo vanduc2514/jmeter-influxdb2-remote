@@ -12,6 +12,8 @@ public class MeasureSettings {
     private final String testRunId;
     private final boolean saveErrorResponse;
     private final boolean measureSubResult;
+    private int userMetricPoolSize;
+    private int userMetricIntervalMilli;
 
     MeasureSettings(String hostName, String testName, String testRunId, boolean saveErrorResponse, boolean measureSubResult) {
         this.hostName = hostName;
@@ -45,12 +47,16 @@ public class MeasureSettings {
         return this.measureSubResult;
     }
 
+
+
     public static class MeasureSettingsBuilder {
         private String hostName;
         private String testName;
         private String testRunId;
         private boolean saveErrorResponse;
         private boolean measureSubResult;
+        private int userMetricPoolSize;
+        private int userMetricInterval;
 
         MeasureSettingsBuilder() {
         }
@@ -80,12 +86,18 @@ public class MeasureSettings {
             return this;
         }
 
-        public MeasureSettings build() {
-            return new MeasureSettings(this.hostName, this.testName, this.testRunId, this.saveErrorResponse, this.measureSubResult);
+        public MeasureSettingsBuilder userMetricPoolSize(int size) {
+            userMetricPoolSize = size;
+            return this;
         }
 
-        public String toString() {
-            return "MeasureSettings.MeasureSettingsBuilder(hostName=" + this.hostName + ", testName=" + this.testName + ", testRunId=" + this.testRunId + ", saveErrorResponse=" + this.saveErrorResponse + ", measureSubResult=" + this.measureSubResult + ")";
+        public MeasureSettingsBuilder userMetricInterval(int milli) {
+            userMetricInterval = milli;
+            return this;
+        }
+
+        public MeasureSettings build() {
+            return new MeasureSettings(this.hostName, this.testName, this.testRunId, this.saveErrorResponse, this.measureSubResult);
         }
     }
 }

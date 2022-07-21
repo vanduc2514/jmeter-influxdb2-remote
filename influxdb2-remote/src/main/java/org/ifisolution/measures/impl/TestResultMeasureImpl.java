@@ -27,6 +27,18 @@ public class TestResultMeasureImpl extends AbstractInfluxMeasure implements Test
         saveErrorResponse = measureSettings.isSaveErrorResponse();
     }
 
+    public TestResultMeasureImpl(String hostName,
+                                 String testName,
+                                 String runId,
+                                 boolean saveErrorResponse,
+                                 boolean measureSubResult,
+                                 InfluxClient influxClient) {
+        super(hostName, testName, runId, influxClient);
+        this.saveErrorResponse = saveErrorResponse;
+        this.measureSubResult = measureSubResult;
+        isClientClosed = new AtomicBoolean(false);
+    }
+
     @Override
     public void writeTestResult(SampleResult sampleResult) {
         long latency = sampleResult.getLatency();

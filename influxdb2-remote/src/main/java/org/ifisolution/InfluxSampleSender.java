@@ -58,6 +58,10 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     private boolean saveErrorResponse;
 
+    private int userMetricPoolSize;
+
+    private int userMetricInterval;
+
     // field that is initialized from the server instance
     private transient TestMeasureManager measureManager;
 

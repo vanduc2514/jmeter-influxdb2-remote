@@ -27,6 +27,13 @@ public abstract class AbstractInfluxMeasure {
         runId = measureSettings.getTestRunId();
     }
 
+    public AbstractInfluxMeasure(String hostName, String testName, String runId, InfluxClient influxClient) {
+        this.hostName = hostName;
+        this.testName = testName;
+        this.runId = runId;
+        this.influxClient = influxClient;
+    }
+
     public void closeInfluxConnection() {
         influxClient.closeClient();
         LOGGER.info("Connection to Influx @ {} closed", influxClient.getUrl());
