@@ -25,26 +25,31 @@ public class InfluxClient {
         return new InfluxClientBuilder();
     }
 
-    InfluxClient(InfluxDBClient actualClient, String url) throws InfluxClientException {
+    InfluxClient(InfluxDBClient actualClient,
+                 String influxConnectionUrl,
+                 int writeBatchSize,
+                 int writeFlushInterval,
+                 int writeBufferLimit) throws InfluxClientException {
         this.actualClient = actualClient;
         WriteOptions writeOptions = WriteOptions.builder()
-                .batchSize(2000)
-                .flushInterval(10000)
+                .batchSize(writeBatchSize)
+                .flushInterval(writeFlushInterval)
+                .bufferLimit(writeBufferLimit)
                 .build();
         this.singletonWriteApi = actualClient.makeWriteApi(writeOptions);
-        this.url = url;
+        this.url = influxConnectionUrl;
         checkHealth();
     }
 
     private void checkHealth() throws InfluxClientException {
-        LOGGER.info("Executing Initial Health Check to {}", getUrl());
+        LOGGER.info("Health Check to {}", url);
         HealthCheck health = actualClient.health();
         HealthCheck.StatusEnum healthStatus = health.getStatus();
         if (healthStatus == null ||
                 healthStatus == HealthCheck.StatusEnum.FAIL) {
             String pattern = "Health Check fails. {0}";
             throw new InfluxClientException(
-                    MessageFormat.format(pattern, getUrl(), health.getMessage())
+                    MessageFormat.format(pattern, url, health.getMessage())
             );
         }
         LOGGER.info("Influx Database health status: {}", healthStatus);
@@ -71,10 +76,6 @@ public class InfluxClient {
         } catch (InfluxException e) {
             LOGGER.error(e.getMessage());
         }
-    }
-
-    public String getUrl() {
-        return url;
     }
 
 }

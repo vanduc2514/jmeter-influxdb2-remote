@@ -13,6 +13,12 @@ public class InfluxClientBuilder {
 
     private String influxBucketName;
 
+    private int writeBatchSize;
+
+    private int writeFlushInterval;
+
+    private int writeBufferLimit;
+
     InfluxClientBuilder() {
     }
 
@@ -40,6 +46,21 @@ public class InfluxClientBuilder {
         return this;
     }
 
+    public InfluxClientBuilder writeBatchSize(int writeBatchSize) {
+        this.writeBatchSize = writeBatchSize;
+        return this;
+    }
+
+    public InfluxClientBuilder writeFlushInterval(int writeFlushInterval) {
+        this.writeFlushInterval = writeFlushInterval;
+        return this;
+    }
+
+    public InfluxClientBuilder writeBufferLimit(int writeBufferLimit) {
+        this.writeBufferLimit = writeBufferLimit;
+        return this;
+    }
+
     public InfluxClient build() throws InfluxClientException {
         InfluxDBClient actualClient = InfluxDBClientFactory.create(
                 influxConnectionUrl,
@@ -47,7 +68,12 @@ public class InfluxClientBuilder {
                 influxOrganizationName,
                 influxBucketName
         );
-        return new InfluxClient(actualClient, influxConnectionUrl);
+        return new InfluxClient(
+                actualClient,
+                influxConnectionUrl,
+                writeBatchSize,
+                writeFlushInterval,
+                writeBufferLimit);
     }
 
     private void validateConnectionUrl(String connectionUrl) {
@@ -64,15 +90,4 @@ public class InfluxClientBuilder {
         }
     }
 
-    public InfluxClientBuilder writeBatchSize(int writeBatchSize) {
-        return null;
-    }
-
-    public InfluxClientBuilder writeFlushInterval(int writeFlushInterval) {
-        return null;
-    }
-
-    public InfluxClientBuilder writeBufferLimit(int writeBufferLimit) {
-        return null;
-    }
 }
