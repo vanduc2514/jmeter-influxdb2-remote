@@ -72,7 +72,7 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     private int writeBufferLimit;
 
-    // field that is initialized from the slave instance
+    // fields that are initialized from the slave instance
     private transient ScheduledExecutorService scheduler;
 
     private transient TestResultMeasure testResultMeasure;
@@ -92,11 +92,23 @@ public class InfluxSampleSender extends BatchSampleSender {
         super(listener);
         if (isClientConfigured()) {
             configurePlugin();
-            LOGGER.info("Use {} (master configurations) for this run", CLASS_NAME);
+            LOGGER.info("Use {} (master configuration) for this run", CLASS_NAME);
         } else {
-            LOGGER.info("Use {} (slave configurations) for this run", CLASS_NAME);
+            LOGGER.info("Use {} (slave configuration) for this run", CLASS_NAME);
         }
-        logFields();
+        LOGGER.info(this.toString());
+    }
+
+    @Override
+    public void sampleOccurred(SampleEvent e) {
+        if (testResultMeasure != null) {
+            testResultMeasure.writeTestResult(e.getResult());
+            LOGGER.debug("Sent Test Result to Influx");
+        } else {
+            LOGGER.warn("No Influx Configuration found. Cannot send measure to Influx!");
+        }
+        super.sampleOccurred(e);
+        LOGGER.debug("Sent Test Result to Master.");
     }
 
     @Override
@@ -113,34 +125,19 @@ public class InfluxSampleSender extends BatchSampleSender {
         LOGGER.debug("Sent Test End to Master");
     }
 
-    @Override
-    public void sampleOccurred(SampleEvent e) {
-        if (testResultMeasure != null) {
-            testResultMeasure.writeTestResult(e.getResult());
-            LOGGER.debug("Sent Test Result to Influx");
-        } else {
-            LOGGER.warn("No Influx Configuration found. Cannot send measure to Influx!");
-        }
-        super.sampleOccurred(e);
-        LOGGER.debug("Sent Test Result to Master.");
-    }
-
     /**
      * Processed by the RMI server code; acts as testStarted().
-     *
-     * @return this
-     * @throws ObjectStreamException never
      */
     private Object readResolve() throws ObjectStreamException {
         String hostName = JMeterUtils.getLocalHostName();
         LOGGER.info("Configure InfluxSampleSender @ {}", hostName);
         if (isClientConfigured()) {
-            LOGGER.info("Use {} (master configurations) for this run", CLASS_NAME);
+            LOGGER.info("Use {} (master configuration) for this run", CLASS_NAME);
         } else {
             configurePlugin();
-            LOGGER.info("Use {} (slave configurations) for this run", CLASS_NAME);
+            LOGGER.info("Use {} (slave configuration) for this run", CLASS_NAME);
         }
-        logFields();
+        LOGGER.info(this.toString());
 
         try {
             influxClientProxy = InfluxClientProxy.builder()
@@ -180,6 +177,10 @@ public class InfluxSampleSender extends BatchSampleSender {
         return this;
     }
 
+    /**
+     * Invoked only once. If properties are sent from master, then this
+     * method is invoked from there. Otherwise, it will be invoked by slave.
+     */
     private void configurePlugin() {
         PluginConfiguration pluginConfiguration = new PluginConfiguration();
         // Test Run properties
@@ -199,11 +200,23 @@ public class InfluxSampleSender extends BatchSampleSender {
         writeBufferLimit = pluginConfiguration.writeBufferLimit();
     }
 
-    private void logFields() {
-        LOGGER.info("InfluxDB: url={}, organization={}, bucket={}",
-                influxConnectionUrl, influxOrganizationName, influxBucketName);
-        LOGGER.info("Test: name={}, runId={}, measureSubResult={}, saveErrorResponse={}",
-                testName, testRunId, measureSubResult, saveErrorResponse);
+    // Log Configuration as JSON
+    @Override
+    public String toString() {
+        return "{\"" + CLASS_NAME + "\":{"
+                + "\"masterConfiguration\":\"" + isClientConfigured() + "\""
+                + "\"influxConnectionUrl\":\"" + influxConnectionUrl + "\""
+                + ", \"influxOrganizationName\":\"" + influxOrganizationName + "\""
+                + ", \"influxBucketName\":\"" + influxBucketName + "\""
+                + ", \"testName\":\"" + testName + "\""
+                + ", \"testRunId\":\"" + testRunId + "\""
+                + ", \"measureSubResult\":\"" + measureSubResult + "\""
+                + ", \"saveErrorResponse\":\"" + saveErrorResponse + "\""
+                + ", \"userMetricPoolSize\":\"" + userMetricPoolSize + "\""
+                + ", \"userMetricInterval\":\"" + userMetricInterval + "\""
+                + ", \"writeBatchSize\":\"" + writeBatchSize + "\""
+                + ", \"writeFlushInterval\":\"" + writeFlushInterval + "\""
+                + ", \"writeBufferLimit\":\"" + writeBufferLimit + "\""
+                + "}}";
     }
-
 }
