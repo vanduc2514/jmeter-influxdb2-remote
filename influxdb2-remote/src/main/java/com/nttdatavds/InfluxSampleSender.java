@@ -183,7 +183,7 @@ public class InfluxSampleSender extends BatchSampleSender {
     private void configurePlugin() {
         PluginConfiguration pluginConfiguration = new PluginConfiguration();
         // Test Run properties
-        influxConnectionUrl = pluginConfiguration.InfluxConnectionUrl();
+        influxConnectionUrl = pluginConfiguration.influxConnectionUrl();
         influxToken = pluginConfiguration.influxToken();
         influxOrganizationName = pluginConfiguration.influxOrganizationName();
         influxBucketName = pluginConfiguration.influxBucketName();

@@ -1,76 +1,67 @@
 package com.nttdatavds.configuration;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.util.JMeterUtils;
 
 public class PluginConfiguration {
 
     public static final String DEFAULT_TEST_NAME = "Jmeter_TestPlan_Default";
     public static final String DEFAULT_RUN_ID = "R001";
+    public static final String EMPTY = StringUtils.EMPTY;
 
-    public String InfluxConnectionUrl() {
-        final var builder = new StringBuilder();
-        boolean enableSSL = Boolean.parseBoolean(JMeterUtils.getProperty(JmeterProperties.INFLUX_SSL_ENABLE.key()));
-        String hostName = JMeterUtils.getProperty(JmeterProperties.INFLUX_HOSTNAME.key());
-        String port = JMeterUtils.getProperty(JmeterProperties.INFLUX_PORT.key());
-
-        if (enableSSL) {
-            builder.append("https");
-        } else {
-            builder.append("http");
-        }
-        builder.append("://");
-        builder.append(hostName);
-        builder.append(":");
-        builder.append(port);
-
-        return builder.toString();
+    public String influxConnectionUrl() {
+        String url = StringUtils.EMPTY;
+        boolean enableSSL = JMeterUtils.getPropDefault("influxdb.ssl.enable", false);
+        String hostName = JMeterUtils.getPropDefault("influxdb.hostname", EMPTY);
+        String port = JMeterUtils.getPropDefault("influxdb.port", EMPTY);
+        return url + (enableSSL ? "https" : "http") + "://" + hostName + ":" + port;
     }
 
     public String influxToken() {
-        return JMeterUtils.getProperty(JmeterProperties.INFLUX_TOKEN.key());
+        return JMeterUtils.getPropDefault("influxdb.token", EMPTY);
     }
 
     public String influxOrganizationName() {
-        return JMeterUtils.getProperty(JmeterProperties.INFLUX_ORGANIZATION.key());
+        return JMeterUtils.getPropDefault("influxdb.organization", EMPTY);
     }
 
     public String influxBucketName() {
-        return JMeterUtils.getProperty(JmeterProperties.INFLUX_BUCKET.key());
+        return JMeterUtils.getPropDefault("influxdb.bucket", EMPTY);
     }
 
     public String testName() {
-        return JMeterUtils.getPropDefault(JmeterProperties.TEST_NAME.key(), DEFAULT_TEST_NAME);
+        return JMeterUtils.getPropDefault("test.name", DEFAULT_TEST_NAME);
     }
 
     public String testRunId() {
-        return JMeterUtils.getPropDefault(JmeterProperties.TEST_RUN_ID.key(), DEFAULT_RUN_ID);
+        return JMeterUtils.getPropDefault("test.runId", DEFAULT_RUN_ID);
     }
 
     public boolean saveErrorResponse() {
-        return Boolean.parseBoolean(JMeterUtils.getPropDefault(JmeterProperties.SAVE_ERROR_RESPONSE.key(), "false"));
+        return JMeterUtils.getPropDefault("measure.save.error", false);
     }
 
     public boolean measureSubResult() {
-        return Boolean.parseBoolean(JMeterUtils.getPropDefault(JmeterProperties.MEASURE_SUB_RESULT.key(), "false"));
+        return JMeterUtils.getPropDefault("measure.sub.result", false);
     }
 
     public int userMetricInterval() {
-        return 0;
+        return JMeterUtils.getPropDefault("measure.user.interval", 1);
     }
 
     public int userMetricPoolSize() {
-        return 0;
+        return JMeterUtils.getPropDefault("measure.user.pool", 10);
     }
 
     public int writeBatchSize() {
-        return 0;
+        return JMeterUtils.getPropDefault("write.batch", 1000);
     }
 
     public int writeFlushInterval() {
-        return 0;
+        return JMeterUtils.getPropDefault("write.flush.interval", 1000);
     }
 
     public int writeBufferLimit() {
-        return 0;
+        return JMeterUtils.getPropDefault("write.buffer.limit", 10000);
     }
 }
