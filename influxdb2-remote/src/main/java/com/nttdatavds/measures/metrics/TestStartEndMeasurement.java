@@ -1,4 +1,4 @@
-package org.ifisolution.measures.metrics;
+package com.nttdatavds.measures.metrics;
 
 public interface TestStartEndMeasurement {
 

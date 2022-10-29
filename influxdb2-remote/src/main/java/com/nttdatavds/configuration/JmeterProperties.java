@@ -1,4 +1,4 @@
-package org.ifisolution.configuration;
+package com.nttdatavds.configuration;
 
 public enum JmeterProperties {
     INFLUX_HOSTNAME("influxdb.hostname"),

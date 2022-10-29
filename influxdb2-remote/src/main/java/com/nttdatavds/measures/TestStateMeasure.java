@@ -1,9 +1,9 @@
-package org.ifisolution.measures;
+package com.nttdatavds.measures;
 
 import com.influxdb.client.write.Point;
+import com.nttdatavds.measures.metrics.TestStartEndMeasurement;
+import com.nttdatavds.measures.metrics.VirtualUsersMeasurement;
 import org.apache.jmeter.visualizers.backend.UserMetric;
-import org.ifisolution.measures.metrics.TestStartEndMeasurement;
-import org.ifisolution.measures.metrics.VirtualUsersMeasurement;
 
 public interface TestStateMeasure extends InfluxMeasure {
 

@@ -1,4 +1,4 @@
-package org.ifisolution.influxdb;
+package com.nttdatavds.influxdb;
 
 import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.InfluxDBClientFactory;

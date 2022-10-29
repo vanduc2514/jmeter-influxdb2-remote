@@ -1,13 +1,13 @@
-package org.ifisolution.measures.impl;
+package com.nttdatavds.measures.impl;
 
 import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
+import com.nttdatavds.configuration.MeasureSettings;
+import com.nttdatavds.influxdb.InfluxClient;
+import com.nttdatavds.measures.MeasureHelper;
+import com.nttdatavds.measures.TestResultMeasure;
+import com.nttdatavds.measures.metrics.RequestMeasurement;
 import org.apache.jmeter.samplers.SampleResult;
-import org.ifisolution.configuration.MeasureSettings;
-import org.ifisolution.influxdb.InfluxClient;
-import org.ifisolution.measures.MeasureHelper;
-import org.ifisolution.measures.TestResultMeasure;
-import org.ifisolution.measures.metrics.RequestMeasurement;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

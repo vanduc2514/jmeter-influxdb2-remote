@@ -1,8 +1,8 @@
-package org.ifisolution.measures;
+package com.nttdatavds.measures;
 
+import com.nttdatavds.measures.metrics.RequestMeasurement;
 import org.apache.jmeter.samplers.RemoteSampleListener;
 import org.apache.jmeter.samplers.SampleResult;
-import org.ifisolution.measures.metrics.RequestMeasurement;
 
 public interface TestResultMeasure extends InfluxMeasure {
 

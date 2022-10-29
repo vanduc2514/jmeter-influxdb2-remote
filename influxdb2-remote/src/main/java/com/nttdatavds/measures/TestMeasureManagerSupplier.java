@@ -1,8 +1,8 @@
-package org.ifisolution.measures;
+package com.nttdatavds.measures;
 
-import org.ifisolution.influxdb.InfluxClient;
-import org.ifisolution.measures.impl.TestResultMeasureImpl;
-import org.ifisolution.measures.impl.TestStateMeasureImpl;
+import com.nttdatavds.influxdb.InfluxClient;
+import com.nttdatavds.measures.impl.TestResultMeasureImpl;
+import com.nttdatavds.measures.impl.TestStateMeasureImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -3,7 +3,7 @@
 // (powered by FernFlower decompiler)
 //
 
-package org.ifisolution.configuration;
+package com.nttdatavds.configuration;
 
 public class MeasureSettings {
 

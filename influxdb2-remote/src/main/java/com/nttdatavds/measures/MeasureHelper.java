@@ -1,4 +1,4 @@
-package org.ifisolution.measures;
+package com.nttdatavds.measures;
 
 public class MeasureHelper {
 

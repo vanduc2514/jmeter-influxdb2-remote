@@ -1,14 +1,14 @@
-package org.ifisolution.measures.impl;
+package com.nttdatavds.measures.impl;
 
 import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
+import com.nttdatavds.configuration.MeasureSettings;
+import com.nttdatavds.influxdb.InfluxClient;
+import com.nttdatavds.measures.MeasureHelper;
+import com.nttdatavds.measures.TestStateMeasure;
+import com.nttdatavds.measures.metrics.TestStartEndMeasurement;
+import com.nttdatavds.measures.metrics.VirtualUsersMeasurement;
 import org.apache.jmeter.visualizers.backend.UserMetric;
-import org.ifisolution.configuration.MeasureSettings;
-import org.ifisolution.influxdb.InfluxClient;
-import org.ifisolution.measures.MeasureHelper;
-import org.ifisolution.measures.TestStateMeasure;
-import org.ifisolution.measures.metrics.TestStartEndMeasurement;
-import org.ifisolution.measures.metrics.VirtualUsersMeasurement;
 
 public class TestStateMeasureImpl extends AbstractInfluxMeasure implements TestStateMeasure {
 

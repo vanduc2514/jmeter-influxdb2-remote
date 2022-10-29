@@ -1,8 +1,8 @@
-package org.ifisolution.measures;
+package com.nttdatavds.measures;
 
+import com.nttdatavds.influxdb.InfluxClient;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.visualizers.backend.UserMetric;
-import org.ifisolution.influxdb.InfluxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

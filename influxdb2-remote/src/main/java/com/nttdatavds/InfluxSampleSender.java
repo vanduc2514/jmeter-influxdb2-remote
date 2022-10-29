@@ -15,20 +15,19 @@
  * limitations under the License.
  */
 
-package org.ifisolution;
+package com.nttdatavds;
 
+import com.nttdatavds.configuration.MeasureSettings;
+import com.nttdatavds.configuration.PluginConfiguration;
+import com.nttdatavds.influxdb.InfluxClient;
+import com.nttdatavds.influxdb.InfluxClientException;
+import com.nttdatavds.measures.TestMeasureManager;
 import org.apache.jmeter.samplers.BatchSampleSender;
 import org.apache.jmeter.samplers.RemoteSampleListener;
 import org.apache.jmeter.samplers.SampleEvent;
 import org.apache.jmeter.samplers.SampleSenderFactory;
 import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jmeter.visualizers.backend.UserMetric;
-import org.ifisolution.configuration.ClientProperties;
-import org.ifisolution.configuration.MeasureSettings;
-import org.ifisolution.influxdb.InfluxClient;
-import org.ifisolution.influxdb.InfluxClientException;
-import org.ifisolution.measures.TestMeasureManager;
-import org.ifisolution.measures.TestResultMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,10 +37,12 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     private static final long serialVersionUID = 3371144997364645511L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InfluxSampleSender.class.getSimpleName());
+    private static final String CLASS_NAME = InfluxSampleSender.class.getSimpleName();
 
-    // fields that are initialized from the client instance
-    // then is copied to the server instance by RMI
+    private static final Logger LOGGER = LoggerFactory.getLogger(CLASS_NAME);
+
+    // fields that are initialized from the master instance
+    // then is sent to the slave instance through RMI
     private String influxConnectionUrl;
 
     private String influxToken;
@@ -62,21 +63,21 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     private int userMetricInterval;
 
-    // field that is initialized from the server instance
+    // field that is initialized from the slave instance
     private transient TestMeasureManager measureManager;
 
     /**
      * This constructor is invoked through reflection found in {@link SampleSenderFactory}
      *
-     * <b>This constructor is called by client instance</b>
+     * <b>This constructor is called by slave instance</b>
      */
     public InfluxSampleSender(RemoteSampleListener listener) {
         super(listener);
         if (isClientConfigured()) {
-            LOGGER.info("Using InfluxSampleSender (client settings) for this run. Settings are initialized from client instance");
-            initializePropertiesFromClient();
+            configurePlugin();
+            LOGGER.info("Use {} (master configurations) for this run", CLASS_NAME);
         } else {
-            LOGGER.info("Using InfluxSampleSender (server settings) for this run");
+            LOGGER.info("Use {} (slave configurations) for this run", CLASS_NAME);
         }
         logFields();
     }
@@ -94,11 +95,12 @@ public class InfluxSampleSender extends BatchSampleSender {
     public void sampleOccurred(SampleEvent e) {
         if (measureManager != null) {
             measureManager.writeTestResult(e.getResult());
+            LOGGER.info("Sent Test Result to Influx");
         } else {
-            LOGGER.warn("No {} is configured. This remote machine does not send Test Result Point to Influx",
-                    TestResultMeasure.class.getSimpleName());
+            LOGGER.warn("No Influx Configuration found. Cannot send measure to Influx!");
         }
         super.sampleOccurred(e);
+        LOGGER.info("Sent Test Result to master.");
     }
 
     /**
@@ -111,10 +113,10 @@ public class InfluxSampleSender extends BatchSampleSender {
         String hostName = JMeterUtils.getLocalHostName();
         LOGGER.info("Configure InfluxSampleSender @ {}", hostName);
         if (isClientConfigured()) {
-            LOGGER.info("Using InfluxSampleSender (client settings) for this run. Settings are copied from client instance");
+            LOGGER.info("Use {} (master configurations) for this run", CLASS_NAME);
         } else {
-            LOGGER.info("Using InfluxSampleSender (server settings) for this run. Settings are initialized from server instance");
-            initializePropertiesFromClient();
+            configurePlugin();
+            LOGGER.info("Use {} (slave configurations) for this run", CLASS_NAME);
         }
         logFields();
 
@@ -148,16 +150,16 @@ public class InfluxSampleSender extends BatchSampleSender {
         measureManager = TestMeasureManager.getManagerInstance(influxClient, measureSettings);
     }
 
-    private void initializePropertiesFromClient() {
-        ClientProperties clientProperties = new ClientProperties();
-        influxConnectionUrl = clientProperties.InfluxConnectionUrl();
-        influxToken = clientProperties.influxToken();
-        influxOrganizationName = clientProperties.influxOrganizationName();
-        influxBucketName = clientProperties.influxBucketName();
-        testName = clientProperties.testName();
-        testRunId = clientProperties.testRunId();
-        measureSubResult = clientProperties.measureSubResult();
-        saveErrorResponse = clientProperties.saveErrorResponse();
+    private void configurePlugin() {
+        PluginConfiguration pluginConfiguration = new PluginConfiguration();
+        influxConnectionUrl = pluginConfiguration.InfluxConnectionUrl();
+        influxToken = pluginConfiguration.influxToken();
+        influxOrganizationName = pluginConfiguration.influxOrganizationName();
+        influxBucketName = pluginConfiguration.influxBucketName();
+        testName = pluginConfiguration.testName();
+        testRunId = pluginConfiguration.testRunId();
+        measureSubResult = pluginConfiguration.measureSubResult();
+        saveErrorResponse = pluginConfiguration.saveErrorResponse();
     }
 
     private void logFields() {

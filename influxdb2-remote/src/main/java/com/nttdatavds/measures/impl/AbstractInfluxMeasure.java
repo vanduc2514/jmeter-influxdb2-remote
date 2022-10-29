@@ -1,7 +1,7 @@
-package org.ifisolution.measures.impl;
+package com.nttdatavds.measures.impl;
 
-import org.ifisolution.configuration.MeasureSettings;
-import org.ifisolution.influxdb.InfluxClient;
+import com.nttdatavds.configuration.MeasureSettings;
+import com.nttdatavds.influxdb.InfluxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

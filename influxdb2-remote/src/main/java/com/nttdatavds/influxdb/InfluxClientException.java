@@ -1,4 +1,4 @@
-package org.ifisolution.influxdb;
+package com.nttdatavds.influxdb;
 
 public class InfluxClientException extends Exception {
 
