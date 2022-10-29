@@ -3,6 +3,7 @@ package org.ifisolution.influxdb;
 import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.InfluxDBClientFactory;
 import com.influxdb.client.WriteApi;
+import com.influxdb.client.WriteOptions;
 import com.influxdb.client.domain.HealthCheck;
 import com.influxdb.client.write.Point;
 import com.influxdb.exceptions.InfluxException;
@@ -29,7 +30,11 @@ public class InfluxClient {
     private InfluxClient(InfluxDBClient actualClient, String hostName) {
         this.actualClient = actualClient;
         this.hostName = hostName;
-        this.singletonWriteApi = actualClient.makeWriteApi();
+        WriteOptions writeOptions = WriteOptions.builder()
+                .batchSize(2000)
+                .flushInterval(10000)
+                .build();
+        this.singletonWriteApi = actualClient.makeWriteApi(writeOptions);
     }
 
     /**
