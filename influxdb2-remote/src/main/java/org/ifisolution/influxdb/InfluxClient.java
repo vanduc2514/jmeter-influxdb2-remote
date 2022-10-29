@@ -27,12 +27,11 @@ public class InfluxClient {
 
     InfluxClient(InfluxDBClient actualClient, String url) throws InfluxClientException {
         this.actualClient = actualClient;
-        this.singletonWriteApi = actualClient.makeWriteApi(
-                WriteOptions
-                        .builder()
-                        .flushInterval(10)
-                        .build()
-        );
+        WriteOptions writeOptions = WriteOptions.builder()
+                .batchSize(2000)
+                .flushInterval(10000)
+                .build();
+        this.singletonWriteApi = actualClient.makeWriteApi(writeOptions);
         this.url = url;
         checkHealth();
     }
