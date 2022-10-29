@@ -1,7 +1,7 @@
 package org.ifisolution.measures.impl;
 
+import org.ifisolution.configuration.MeasureSettings;
 import org.ifisolution.influxdb.InfluxClient;
-import org.ifisolution.measures.MeasureConfigurationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,16 +20,23 @@ public abstract class AbstractInfluxMeasure {
     protected final InfluxClient influxClient;
 
     public AbstractInfluxMeasure(InfluxClient influxClient,
-                                 MeasureConfigurationProvider configurationProvider) {
+                                 MeasureSettings measureSettings) {
         this.influxClient = influxClient;
-        hostName = configurationProvider.provideHostName();
-        testName = configurationProvider.provideTestName();
-        runId = configurationProvider.provideRunId();
+        hostName = measureSettings.getHostName();
+        testName = measureSettings.getTestName();
+        runId = measureSettings.getTestRunId();
+    }
+
+    public AbstractInfluxMeasure(String hostName, String testName, String runId, InfluxClient influxClient) {
+        this.hostName = hostName;
+        this.testName = testName;
+        this.runId = runId;
+        this.influxClient = influxClient;
     }
 
     public void closeInfluxConnection() {
         influxClient.closeClient();
-        LOGGER.info("Connection to Influx @ {} closed", influxClient.getHostName());
+        LOGGER.info("Connection to Influx @ {} closed", influxClient.getUrl());
     }
 
 }

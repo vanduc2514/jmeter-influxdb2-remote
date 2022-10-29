@@ -1,10 +1,10 @@
-package org.ifisolution.util;
+package org.ifisolution.measures;
 
-public class MeasureUtil {
+public class MeasureHelper {
 
     public static final int SCALE = 1000;
 
-    private MeasureUtil() {
+    private MeasureHelper() {
     }
 
     public static long getCurrentTimeMilliSecond() {
