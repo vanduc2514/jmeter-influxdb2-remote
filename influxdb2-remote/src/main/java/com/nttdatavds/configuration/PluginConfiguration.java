@@ -54,4 +54,23 @@ public class PluginConfiguration {
         return Boolean.parseBoolean(JMeterUtils.getPropDefault(JmeterProperties.MEASURE_SUB_RESULT.key(), "false"));
     }
 
+    public int userMetricInterval() {
+        return 0;
+    }
+
+    public int userMetricPoolSize() {
+        return 0;
+    }
+
+    public int writeBatchSize() {
+        return 0;
+    }
+
+    public int writeFlushInterval() {
+        return 0;
+    }
+
+    public int writeBufferLimit() {
+        return 0;
+    }
 }

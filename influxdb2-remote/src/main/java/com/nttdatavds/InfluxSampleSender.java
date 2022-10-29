@@ -66,6 +66,12 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     private int userMetricInterval;
 
+    private int writeBatchSize;
+
+    private int writeFlushInterval;
+
+    private int writeBufferLimit;
+
     // field that is initialized from the slave instance
     private transient ScheduledExecutorService scheduler;
 
@@ -142,6 +148,9 @@ public class InfluxSampleSender extends BatchSampleSender {
                     .token(influxToken)
                     .organization(influxOrganizationName)
                     .bucket(influxBucketName)
+                    .writeBatchSize(writeBatchSize)
+                    .writeFlushInterval(writeFlushInterval)
+                    .writeBufferLimit(writeBufferLimit)
                     .build();
         } catch (InfluxClientException clientException) {
             throw new InvalidObjectException(clientException.getMessage());
@@ -173,6 +182,7 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     private void configurePlugin() {
         PluginConfiguration pluginConfiguration = new PluginConfiguration();
+        // Test Run properties
         influxConnectionUrl = pluginConfiguration.InfluxConnectionUrl();
         influxToken = pluginConfiguration.influxToken();
         influxOrganizationName = pluginConfiguration.influxOrganizationName();
@@ -181,6 +191,12 @@ public class InfluxSampleSender extends BatchSampleSender {
         testRunId = pluginConfiguration.testRunId();
         measureSubResult = pluginConfiguration.measureSubResult();
         saveErrorResponse = pluginConfiguration.saveErrorResponse();
+        // Tuning properties
+        userMetricInterval = pluginConfiguration.userMetricInterval();
+        userMetricPoolSize = pluginConfiguration.userMetricPoolSize();
+        writeBatchSize = pluginConfiguration.writeBatchSize();
+        writeFlushInterval = pluginConfiguration.writeFlushInterval();
+        writeBufferLimit = pluginConfiguration.writeBufferLimit();
     }
 
     private void logFields() {

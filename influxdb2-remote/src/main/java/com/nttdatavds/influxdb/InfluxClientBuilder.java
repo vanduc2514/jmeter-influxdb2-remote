@@ -64,4 +64,15 @@ public class InfluxClientBuilder {
         }
     }
 
+    public InfluxClientBuilder writeBatchSize(int writeBatchSize) {
+        return null;
+    }
+
+    public InfluxClientBuilder writeFlushInterval(int writeFlushInterval) {
+        return null;
+    }
+
+    public InfluxClientBuilder writeBufferLimit(int writeBufferLimit) {
+        return null;
+    }
 }
