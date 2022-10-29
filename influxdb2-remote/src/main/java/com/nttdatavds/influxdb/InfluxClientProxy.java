@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
 
-public class InfluxClient {
+public class InfluxClientProxy {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InfluxClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InfluxClientProxy.class);
 
     private final InfluxDBClient actualClient;
 
@@ -21,15 +21,15 @@ public class InfluxClient {
 
     private final String url;
 
-    public static InfluxClientBuilder builder() {
-        return new InfluxClientBuilder();
+    public static InfluxClientProxyBuilder builder() {
+        return new InfluxClientProxyBuilder();
     }
 
-    InfluxClient(InfluxDBClient actualClient,
-                 String influxConnectionUrl,
-                 int writeBatchSize,
-                 int writeFlushInterval,
-                 int writeBufferLimit) throws InfluxClientException {
+    InfluxClientProxy(InfluxDBClient actualClient,
+                      String influxConnectionUrl,
+                      int writeBatchSize,
+                      int writeFlushInterval,
+                      int writeBufferLimit) throws InfluxClientException {
         this.actualClient = actualClient;
         WriteOptions writeOptions = WriteOptions.builder()
                 .batchSize(writeBatchSize)

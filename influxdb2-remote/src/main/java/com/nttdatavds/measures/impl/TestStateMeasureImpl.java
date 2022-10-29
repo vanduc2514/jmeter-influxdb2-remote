@@ -2,7 +2,7 @@ package com.nttdatavds.measures.impl;
 
 import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
-import com.nttdatavds.influxdb.InfluxClient;
+import com.nttdatavds.influxdb.InfluxClientProxy;
 import com.nttdatavds.measures.MeasureHelper;
 import com.nttdatavds.measures.TestStateMeasure;
 import com.nttdatavds.measures.metrics.TestStartEndMeasurement;
@@ -11,8 +11,8 @@ import org.apache.jmeter.visualizers.backend.UserMetric;
 
 public class TestStateMeasureImpl extends AbstractInfluxMeasure implements TestStateMeasure {
 
-    private TestStateMeasureImpl(InfluxClient influxClient) {
-        super(influxClient);
+    private TestStateMeasureImpl(InfluxClientProxy influxClientProxy) {
+        super(influxClientProxy);
     }
 
     @Override
@@ -23,7 +23,7 @@ public class TestStateMeasureImpl extends AbstractInfluxMeasure implements TestS
                 .addTag(TestStartEndMeasurement.Tags.NODE_NAME, hostName)
                 .addTag(TestStartEndMeasurement.Tags.TEST_NAME, testName)
                 .addField(TestStartEndMeasurement.Fields.PLACEHOLDER, "1");
-        this.influxClient.writeInfluxPoint(startPoint);
+        this.influxClientProxy.writeInfluxPoint(startPoint);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class TestStateMeasureImpl extends AbstractInfluxMeasure implements TestS
                 .addTag(TestStartEndMeasurement.Tags.TEST_NAME, testName)
                 .addTag(TestStartEndMeasurement.Tags.RUN_ID, runId)
                 .addField(TestStartEndMeasurement.Fields.PLACEHOLDER, "1");
-        this.influxClient.writeInfluxPoint(finishPoint);
+        this.influxClientProxy.writeInfluxPoint(finishPoint);
     }
 
     @Override
@@ -47,14 +47,14 @@ public class TestStateMeasureImpl extends AbstractInfluxMeasure implements TestS
                 .addTag(VirtualUsersMeasurement.Tags.NODE_NAME, this.hostName)
                 .addTag(VirtualUsersMeasurement.Tags.TEST_NAME, this.testName)
                 .addTag(VirtualUsersMeasurement.Tags.RUN_ID, this.runId);
-        this.influxClient.writeInfluxPoint(userPoint);
+        this.influxClientProxy.writeInfluxPoint(userPoint);
     }
 
     public static class TestStateMeasureBuilder extends
             AbstractInfluxMeasureBuilder<TestStateMeasureBuilder, TestStateMeasureImpl> {
 
-        public TestStateMeasureBuilder(InfluxClient influxClient) {
-            super(new TestStateMeasureImpl(influxClient));
+        public TestStateMeasureBuilder(InfluxClientProxy influxClientProxy) {
+            super(new TestStateMeasureImpl(influxClientProxy));
         }
 
         @Override

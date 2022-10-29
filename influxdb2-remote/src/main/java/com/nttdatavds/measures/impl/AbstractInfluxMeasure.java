@@ -1,12 +1,12 @@
 package com.nttdatavds.measures.impl;
 
-import com.nttdatavds.influxdb.InfluxClient;
+import com.nttdatavds.influxdb.InfluxClientProxy;
 
 import java.util.Optional;
 
 public abstract class AbstractInfluxMeasure {
 
-    protected InfluxClient influxClient;
+    protected InfluxClientProxy influxClientProxy;
 
     protected String hostName;
 
@@ -14,8 +14,8 @@ public abstract class AbstractInfluxMeasure {
 
     protected String runId;
 
-    protected AbstractInfluxMeasure(InfluxClient influxClient) {
-        this.influxClient = influxClient;
+    protected AbstractInfluxMeasure(InfluxClientProxy influxClientProxy) {
+        this.influxClientProxy = influxClientProxy;
     }
 
     abstract static class AbstractInfluxMeasureBuilder<

@@ -2,7 +2,7 @@ package com.nttdatavds.measures.impl;
 
 import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
-import com.nttdatavds.influxdb.InfluxClient;
+import com.nttdatavds.influxdb.InfluxClientProxy;
 import com.nttdatavds.measures.MeasureHelper;
 import com.nttdatavds.measures.TestResultMeasure;
 import com.nttdatavds.measures.metrics.RequestMeasurement;
@@ -14,8 +14,8 @@ public class TestResultMeasureImpl extends AbstractInfluxMeasure implements Test
 
     private boolean measureSubResult;
 
-    private TestResultMeasureImpl(InfluxClient influxClient) {
-        super(influxClient);
+    private TestResultMeasureImpl(InfluxClientProxy influxClientProxy) {
+        super(influxClientProxy);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class TestResultMeasureImpl extends AbstractInfluxMeasure implements Test
                 .addField(RequestMeasurement.Fields.CONNECT_TIME, connectTime)
                 .addField(RequestMeasurement.Fields.PROCESSING_TIME, latency - connectTime);
 
-        this.influxClient.writeInfluxPoint(resultPoint);
+        this.influxClientProxy.writeInfluxPoint(resultPoint);
 
         if (measureSubResult) {
             SampleResult[] subResults = sampleResult.getSubResults();
@@ -90,8 +90,8 @@ public class TestResultMeasureImpl extends AbstractInfluxMeasure implements Test
     public static class TestResultMeasureBuilder extends
             AbstractInfluxMeasureBuilder<TestResultMeasureBuilder, TestResultMeasureImpl> {
 
-        public TestResultMeasureBuilder(InfluxClient influxClient) {
-            super(new TestResultMeasureImpl(influxClient));
+        public TestResultMeasureBuilder(InfluxClientProxy influxClientProxy) {
+            super(new TestResultMeasureImpl(influxClientProxy));
         }
 
         public TestResultMeasureBuilder saveErrorResponse(boolean saveErrorResponse) {

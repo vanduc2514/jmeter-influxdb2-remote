@@ -3,7 +3,7 @@ package com.nttdatavds.influxdb;
 import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.InfluxDBClientFactory;
 
-public class InfluxClientBuilder {
+public class InfluxClientProxyBuilder {
 
     private String influxConnectionUrl;
 
@@ -19,56 +19,56 @@ public class InfluxClientBuilder {
 
     private int writeBufferLimit;
 
-    InfluxClientBuilder() {
+    InfluxClientProxyBuilder() {
     }
 
-    public InfluxClientBuilder connectionUrl(String connectionUrl) {
+    public InfluxClientProxyBuilder connectionUrl(String connectionUrl) {
         validateConnectionUrl(connectionUrl);
         influxConnectionUrl = connectionUrl;
         return this;
     }
 
-    public InfluxClientBuilder token(String token) {
+    public InfluxClientProxyBuilder token(String token) {
         validateStringValue("influxToken", token);
         influxToken = token;
         return this;
     }
 
-    public InfluxClientBuilder organization(String organization) {
+    public InfluxClientProxyBuilder organization(String organization) {
         validateStringValue("influxOrganizationName", organization);
         influxOrganizationName = organization;
         return this;
     }
 
-    public InfluxClientBuilder bucket(String bucket) {
+    public InfluxClientProxyBuilder bucket(String bucket) {
         validateStringValue("influxBucketName", bucket);
         influxBucketName = bucket;
         return this;
     }
 
-    public InfluxClientBuilder writeBatchSize(int writeBatchSize) {
+    public InfluxClientProxyBuilder writeBatchSize(int writeBatchSize) {
         this.writeBatchSize = writeBatchSize;
         return this;
     }
 
-    public InfluxClientBuilder writeFlushInterval(int writeFlushInterval) {
+    public InfluxClientProxyBuilder writeFlushInterval(int writeFlushInterval) {
         this.writeFlushInterval = writeFlushInterval;
         return this;
     }
 
-    public InfluxClientBuilder writeBufferLimit(int writeBufferLimit) {
+    public InfluxClientProxyBuilder writeBufferLimit(int writeBufferLimit) {
         this.writeBufferLimit = writeBufferLimit;
         return this;
     }
 
-    public InfluxClient build() throws InfluxClientException {
+    public InfluxClientProxy build() throws InfluxClientException {
         InfluxDBClient actualClient = InfluxDBClientFactory.create(
                 influxConnectionUrl,
                 influxToken.toCharArray(),
                 influxOrganizationName,
                 influxBucketName
         );
-        return new InfluxClient(
+        return new InfluxClientProxy(
                 actualClient,
                 influxConnectionUrl,
                 writeBatchSize,

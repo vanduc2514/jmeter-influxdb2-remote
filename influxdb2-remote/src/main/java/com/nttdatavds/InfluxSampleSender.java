@@ -18,8 +18,8 @@
 package com.nttdatavds;
 
 import com.nttdatavds.configuration.PluginConfiguration;
-import com.nttdatavds.influxdb.InfluxClient;
 import com.nttdatavds.influxdb.InfluxClientException;
+import com.nttdatavds.influxdb.InfluxClientProxy;
 import com.nttdatavds.measures.Measures;
 import com.nttdatavds.measures.TestResultMeasure;
 import com.nttdatavds.measures.TestStateMeasure;
@@ -79,7 +79,7 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     private transient TestStateMeasure testStateMeasure;
 
-    private transient InfluxClient influxClient;
+    private transient InfluxClientProxy influxClientProxy;
 
     /**
      * Dynamic constructor which is invoked by both master and slave instance through
@@ -107,7 +107,7 @@ public class InfluxSampleSender extends BatchSampleSender {
         }
         scheduler.shutdown();
         LOGGER.debug("Scheduler for User Metric Shut down");
-        influxClient.closeClient();
+        influxClientProxy.closeClient();
         LOGGER.debug("Influx Client closed!");
         super.testEnded(host);
         LOGGER.debug("Sent Test End to Master");
@@ -143,7 +143,7 @@ public class InfluxSampleSender extends BatchSampleSender {
         logFields();
 
         try {
-            influxClient = InfluxClient.builder()
+            influxClientProxy = InfluxClientProxy.builder()
                     .connectionUrl(influxConnectionUrl)
                     .token(influxToken)
                     .organization(influxOrganizationName)
@@ -156,14 +156,14 @@ public class InfluxSampleSender extends BatchSampleSender {
             throw new InvalidObjectException(clientException.getMessage());
         }
 
-        testResultMeasure = Measures.testResultMeasureBuilder(influxClient)
+        testResultMeasure = Measures.testResultMeasureBuilder(influxClientProxy)
                 .hostName(hostName)
                 .testName(testName)
                 .testRunId(testRunId)
                 .measureSubResult(measureSubResult)
                 .saveErrorResponse(saveErrorResponse)
                 .build();
-        testStateMeasure = Measures.testStateMeasureBuilder(influxClient)
+        testStateMeasure = Measures.testStateMeasureBuilder(influxClientProxy)
                 .hostName(hostName)
                 .testName(testName)
                 .testRunId(testRunId)
