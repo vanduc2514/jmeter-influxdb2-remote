@@ -17,11 +17,12 @@
 
 package com.nttdatavds;
 
-import com.nttdatavds.configuration.MeasureSettings;
 import com.nttdatavds.configuration.PluginConfiguration;
 import com.nttdatavds.influxdb.InfluxClient;
 import com.nttdatavds.influxdb.InfluxClientException;
-import com.nttdatavds.measures.TestMeasureManager;
+import com.nttdatavds.measures.Measures;
+import com.nttdatavds.measures.TestResultMeasure;
+import com.nttdatavds.measures.TestStateMeasure;
 import org.apache.jmeter.samplers.BatchSampleSender;
 import org.apache.jmeter.samplers.RemoteSampleListener;
 import org.apache.jmeter.samplers.SampleEvent;
@@ -31,7 +32,11 @@ import org.apache.jmeter.visualizers.backend.UserMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InvalidObjectException;
 import java.io.ObjectStreamException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class InfluxSampleSender extends BatchSampleSender {
 
@@ -41,8 +46,6 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CLASS_NAME);
 
-    // fields that are initialized from the master instance
-    // then is sent to the slave instance through RMI
     private String influxConnectionUrl;
 
     private String influxToken;
@@ -64,12 +67,20 @@ public class InfluxSampleSender extends BatchSampleSender {
     private int userMetricInterval;
 
     // field that is initialized from the slave instance
-    private transient TestMeasureManager measureManager;
+    private transient ScheduledExecutorService scheduler;
+
+    private transient TestResultMeasure testResultMeasure;
+
+    private transient TestStateMeasure testStateMeasure;
+
+    private transient InfluxClient influxClient;
 
     /**
-     * This constructor is invoked through reflection found in {@link SampleSenderFactory}
-     *
-     * <b>This constructor is called by slave instance</b>
+     * Dynamic constructor which is invoked by both master and slave instance through
+     * reflection found in {@link SampleSenderFactory}. If configurations are sent
+     * from mater, this Sender will be configured from there and then sent to the slave
+     * along with configured properties. Otherwise, its properties are configured in the
+     * {@link #readResolve()} magic method.
      */
     public InfluxSampleSender(RemoteSampleListener listener) {
         super(listener);
@@ -84,23 +95,28 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     @Override
     public void testEnded(String host) {
-        if (measureManager != null) {
-            measureManager.writeTestEnded();
-            measureManager.closeManager();
+        if (testStateMeasure != null) {
+            testStateMeasure.writeFinishState();
+            LOGGER.debug("Sent Test End to Influx");
         }
+        scheduler.shutdown();
+        LOGGER.debug("Scheduler for User Metric Shut down");
+        influxClient.closeClient();
+        LOGGER.debug("Influx Client closed!");
         super.testEnded(host);
+        LOGGER.debug("Sent Test End to Master");
     }
 
     @Override
     public void sampleOccurred(SampleEvent e) {
-        if (measureManager != null) {
-            measureManager.writeTestResult(e.getResult());
-            LOGGER.info("Sent Test Result to Influx");
+        if (testResultMeasure != null) {
+            testResultMeasure.writeTestResult(e.getResult());
+            LOGGER.debug("Sent Test Result to Influx");
         } else {
             LOGGER.warn("No Influx Configuration found. Cannot send measure to Influx!");
         }
         super.sampleOccurred(e);
-        LOGGER.info("Sent Test Result to master.");
+        LOGGER.debug("Sent Test Result to Master.");
     }
 
     /**
@@ -120,34 +136,39 @@ public class InfluxSampleSender extends BatchSampleSender {
         }
         logFields();
 
-        if (measureManager == null) {
-            try {
-                bootstrapMeasureManager(hostName);
-                measureManager.writeTestStarted();
-                measureManager.writeUserMetric(new UserMetric());
-            } catch (InfluxClientException e) {
-                LOGGER.error(e.getMessage());
-            }
+        try {
+            influxClient = InfluxClient.builder()
+                    .connectionUrl(influxConnectionUrl)
+                    .token(influxToken)
+                    .organization(influxOrganizationName)
+                    .bucket(influxBucketName)
+                    .build();
+        } catch (InfluxClientException clientException) {
+            throw new InvalidObjectException(clientException.getMessage());
         }
 
-        return this;
-    }
-
-    private void bootstrapMeasureManager(String hostName) throws InfluxClientException {
-        MeasureSettings measureSettings = MeasureSettings.builder()
+        testResultMeasure = Measures.testResultMeasureBuilder(influxClient)
                 .hostName(hostName)
                 .testName(testName)
                 .testRunId(testRunId)
                 .measureSubResult(measureSubResult)
                 .saveErrorResponse(saveErrorResponse)
                 .build();
-        InfluxClient influxClient = InfluxClient.builder()
-                .connectionUrl(influxConnectionUrl)
-                .token(influxToken)
-                .organization(influxOrganizationName)
-                .bucket(influxBucketName)
+        testStateMeasure = Measures.testStateMeasureBuilder(influxClient)
+                .hostName(hostName)
+                .testName(testName)
+                .testRunId(testRunId)
                 .build();
-        measureManager = TestMeasureManager.getManagerInstance(influxClient, measureSettings);
+        scheduler = Executors.newScheduledThreadPool(userMetricPoolSize);
+
+        testStateMeasure.writeStartState();
+        LOGGER.debug("Sent Test Start to Influx");
+        scheduler.scheduleAtFixedRate(() -> {
+            testStateMeasure.writeUserMetric(new UserMetric());
+            LOGGER.debug("Sent User Metric to Influx");
+        }, 1, userMetricInterval, TimeUnit.SECONDS);
+
+        return this;
     }
 
     private void configurePlugin() {

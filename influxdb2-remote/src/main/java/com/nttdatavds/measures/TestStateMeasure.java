@@ -5,7 +5,7 @@ import com.nttdatavds.measures.metrics.TestStartEndMeasurement;
 import com.nttdatavds.measures.metrics.VirtualUsersMeasurement;
 import org.apache.jmeter.visualizers.backend.UserMetric;
 
-public interface TestStateMeasure extends InfluxMeasure {
+public interface TestStateMeasure {
 
     /**
      * Write the {@link TestStartEndMeasurement} metric to Influx Database.

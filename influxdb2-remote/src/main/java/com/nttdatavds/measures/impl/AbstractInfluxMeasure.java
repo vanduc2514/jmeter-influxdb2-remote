@@ -1,42 +1,57 @@
 package com.nttdatavds.measures.impl;
 
-import com.nttdatavds.configuration.MeasureSettings;
 import com.nttdatavds.influxdb.InfluxClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 public abstract class AbstractInfluxMeasure {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractInfluxMeasure.class);
+    protected InfluxClient influxClient;
 
     protected String hostName;
 
-    //Avoid NPE in Influx Point
-    protected final String testName;
+    protected String testName;
 
-    //Avoid NPE in Influx Point
-    protected final String runId;
+    protected String runId;
 
-    protected final InfluxClient influxClient;
-
-    public AbstractInfluxMeasure(InfluxClient influxClient,
-                                 MeasureSettings measureSettings) {
-        this.influxClient = influxClient;
-        hostName = measureSettings.getHostName();
-        testName = measureSettings.getTestName();
-        runId = measureSettings.getTestRunId();
-    }
-
-    public AbstractInfluxMeasure(String hostName, String testName, String runId, InfluxClient influxClient) {
-        this.hostName = hostName;
-        this.testName = testName;
-        this.runId = runId;
+    protected AbstractInfluxMeasure(InfluxClient influxClient) {
         this.influxClient = influxClient;
     }
 
-    public void closeInfluxConnection() {
-        influxClient.closeClient();
-        LOGGER.info("Connection to Influx @ {} closed", influxClient.getUrl());
+    abstract static class AbstractInfluxMeasureBuilder<
+            T extends AbstractInfluxMeasureBuilder<T, M>, M extends AbstractInfluxMeasure> {
+
+        protected final M measure;
+
+        protected AbstractInfluxMeasureBuilder(M measure) {
+            this.measure = measure;
+        }
+
+        public T hostName(String hostName) {
+            measure.hostName = safelyGet("host-name", hostName);
+            return builder();
+        }
+
+        public T testName(String testName) {
+            measure.testName = safelyGet("test-name", testName);
+            return builder();
+        }
+
+        public T testRunId(String runId) {
+            measure.runId = safelyGet("run-id", runId);
+            return builder();
+        }
+
+        public M build() {
+            return measure;
+        }
+
+        protected abstract T builder();
+
+        protected String safelyGet(String propertyName, String value) {
+            return Optional.ofNullable(value).orElse("dummy-" + propertyName);
+        }
+
     }
 
 }

@@ -2,7 +2,6 @@ package com.nttdatavds.measures.impl;
 
 import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
-import com.nttdatavds.configuration.MeasureSettings;
 import com.nttdatavds.influxdb.InfluxClient;
 import com.nttdatavds.measures.MeasureHelper;
 import com.nttdatavds.measures.TestStateMeasure;
@@ -12,12 +11,8 @@ import org.apache.jmeter.visualizers.backend.UserMetric;
 
 public class TestStateMeasureImpl extends AbstractInfluxMeasure implements TestStateMeasure {
 
-    public TestStateMeasureImpl(InfluxClient influxClient, MeasureSettings measureSettings) {
-        super(influxClient, measureSettings);
-    }
-
-    public TestStateMeasureImpl(String hostName, String testName, String runId, InfluxClient influxClient) {
-        super(hostName, testName, runId, influxClient);
+    private TestStateMeasureImpl(InfluxClient influxClient) {
+        super(influxClient);
     }
 
     @Override
@@ -53,5 +48,19 @@ public class TestStateMeasureImpl extends AbstractInfluxMeasure implements TestS
                 .addTag(VirtualUsersMeasurement.Tags.TEST_NAME, this.testName)
                 .addTag(VirtualUsersMeasurement.Tags.RUN_ID, this.runId);
         this.influxClient.writeInfluxPoint(userPoint);
+    }
+
+    public static class TestStateMeasureBuilder extends
+            AbstractInfluxMeasureBuilder<TestStateMeasureBuilder, TestStateMeasureImpl> {
+
+        public TestStateMeasureBuilder(InfluxClient influxClient) {
+            super(new TestStateMeasureImpl(influxClient));
+        }
+
+        @Override
+        protected TestStateMeasureBuilder builder() {
+            return this;
+        }
+
     }
 }

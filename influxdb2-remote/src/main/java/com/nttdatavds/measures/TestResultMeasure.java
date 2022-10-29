@@ -4,7 +4,7 @@ import com.nttdatavds.measures.metrics.RequestMeasurement;
 import org.apache.jmeter.samplers.RemoteSampleListener;
 import org.apache.jmeter.samplers.SampleResult;
 
-public interface TestResultMeasure extends InfluxMeasure {
+public interface TestResultMeasure {
 
     /**
      * Write {@link RequestMeasurement} metric to Influx Database

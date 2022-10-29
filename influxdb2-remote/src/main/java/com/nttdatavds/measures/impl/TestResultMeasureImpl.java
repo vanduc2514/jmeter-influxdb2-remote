@@ -2,41 +2,20 @@ package com.nttdatavds.measures.impl;
 
 import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
-import com.nttdatavds.configuration.MeasureSettings;
 import com.nttdatavds.influxdb.InfluxClient;
 import com.nttdatavds.measures.MeasureHelper;
 import com.nttdatavds.measures.TestResultMeasure;
 import com.nttdatavds.measures.metrics.RequestMeasurement;
 import org.apache.jmeter.samplers.SampleResult;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class TestResultMeasureImpl extends AbstractInfluxMeasure implements TestResultMeasure {
 
-    private final AtomicBoolean isClientClosed;
+    private boolean saveErrorResponse;
 
-    private final boolean saveErrorResponse;
+    private boolean measureSubResult;
 
-    private final boolean measureSubResult;
-
-    public TestResultMeasureImpl(InfluxClient influxClient,
-                                       MeasureSettings measureSettings) {
-        super(influxClient, measureSettings);
-        isClientClosed = new AtomicBoolean(false);
-        measureSubResult = measureSettings.isMeasureSubResult();
-        saveErrorResponse = measureSettings.isSaveErrorResponse();
-    }
-
-    public TestResultMeasureImpl(String hostName,
-                                 String testName,
-                                 String runId,
-                                 boolean saveErrorResponse,
-                                 boolean measureSubResult,
-                                 InfluxClient influxClient) {
-        super(hostName, testName, runId, influxClient);
-        this.saveErrorResponse = saveErrorResponse;
-        this.measureSubResult = measureSubResult;
-        isClientClosed = new AtomicBoolean(false);
+    private TestResultMeasureImpl(InfluxClient influxClient) {
+        super(influxClient);
     }
 
     @Override
@@ -108,14 +87,28 @@ public class TestResultMeasureImpl extends AbstractInfluxMeasure implements Test
                 .replace("=", "=\\ ");
     }
 
-    /**
-     * Thread safe and run only once
-     */
-    @Override
-    public void closeInfluxConnection() {
-        if (!isClientClosed.getAndSet(true)) {
-            super.closeInfluxConnection();
+    public static class TestResultMeasureBuilder extends
+            AbstractInfluxMeasureBuilder<TestResultMeasureBuilder, TestResultMeasureImpl> {
+
+        public TestResultMeasureBuilder(InfluxClient influxClient) {
+            super(new TestResultMeasureImpl(influxClient));
         }
+
+        public TestResultMeasureBuilder saveErrorResponse(boolean saveErrorResponse) {
+            measure.saveErrorResponse = saveErrorResponse;
+            return builder();
+        }
+
+        public TestResultMeasureBuilder measureSubResult(boolean measureSubResult) {
+            measure.measureSubResult = measureSubResult;
+            return builder();
+        }
+
+        @Override
+        protected TestResultMeasureBuilder builder() {
+            return this;
+        }
+
     }
 
 }
