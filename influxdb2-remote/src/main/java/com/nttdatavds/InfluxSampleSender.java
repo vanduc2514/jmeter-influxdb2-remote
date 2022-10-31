@@ -27,6 +27,7 @@ import org.apache.jmeter.samplers.BatchSampleSender;
 import org.apache.jmeter.samplers.RemoteSampleListener;
 import org.apache.jmeter.samplers.SampleEvent;
 import org.apache.jmeter.samplers.SampleSenderFactory;
+import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jmeter.visualizers.backend.UserMetric;
 import org.slf4j.Logger;
@@ -120,7 +121,14 @@ public class InfluxSampleSender extends BatchSampleSender {
             LOGGER.debug("Sent Test End to Influx");
         }
         try {
+            LOGGER.info("Waiting for All User Thread complete");
+            do {
+                LOGGER.debug("Current Active Thread: {}",
+                        JMeterContextService.getThreadCounts().activeThreads);
+            } while (JMeterContextService.getThreadCounts().finishedThreads
+                    != JMeterContextService.getTotalThreads());
             LOGGER.info("Gracefully Terminate Scheduler. Timeout: {} seconds", TERMINATE_TIMEOUT);
+            scheduler.shutdown();
             if (scheduler.awaitTermination(TERMINATE_TIMEOUT, TimeUnit.SECONDS)) {
                 influxClientProxy.closeClient();
                 LOGGER.info("Influx Client closed!");
