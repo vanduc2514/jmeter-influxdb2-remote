@@ -92,9 +92,9 @@ public class InfluxSampleSender extends BatchSampleSender {
         super(listener);
         if (isClientConfigured()) {
             configurePlugin();
-            LOGGER.info("Use {} (master configuration) for this run", CLASS_NAME);
+            LOGGER.info("Use master configuration for this run");
         } else {
-            LOGGER.info("Use {} (slave configuration) for this run", CLASS_NAME);
+            LOGGER.info("Use slave configuration for this run");
         }
         LOGGER.info(this.toString());
     }
@@ -130,12 +130,11 @@ public class InfluxSampleSender extends BatchSampleSender {
      */
     private Object readResolve() throws ObjectStreamException {
         String hostName = JMeterUtils.getLocalHostName();
-        LOGGER.info("Configure InfluxSampleSender @ {}", hostName);
         if (isClientConfigured()) {
-            LOGGER.info("Use {} (master configuration) for this run", CLASS_NAME);
+            LOGGER.info("Use master configuration for this run");
         } else {
             configurePlugin();
-            LOGGER.info("Use {} (slave configuration) for this run", CLASS_NAME);
+            LOGGER.info("Use slave configuration for this run");
         }
         LOGGER.info(this.toString());
 
@@ -203,7 +202,7 @@ public class InfluxSampleSender extends BatchSampleSender {
     // Log Configuration as JSON
     @Override
     public String toString() {
-        return "{\"" + CLASS_NAME + "\":{"
+        return "{"
                 + "\"masterConfiguration\":\"" + isClientConfigured() + "\""
                 + "\"influxConnectionUrl\":\"" + influxConnectionUrl + "\""
                 + ", \"influxOrganizationName\":\"" + influxOrganizationName + "\""
@@ -217,6 +216,6 @@ public class InfluxSampleSender extends BatchSampleSender {
                 + ", \"writeBatchSize\":\"" + writeBatchSize + "\""
                 + ", \"writeFlushInterval\":\"" + writeFlushInterval + "\""
                 + ", \"writeBufferLimit\":\"" + writeBufferLimit + "\""
-                + "}}";
+                + "}";
     }
 }
