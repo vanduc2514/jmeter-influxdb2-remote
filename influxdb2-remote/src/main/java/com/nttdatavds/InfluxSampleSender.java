@@ -46,7 +46,7 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CLASS_NAME);
 
-    private static final long TERMINATE_TIMEOUT = Long.MAX_VALUE;
+    private static final long TERMINATE_TIMEOUT = 60;
 
     private String influxConnectionUrl;
 
@@ -120,7 +120,7 @@ public class InfluxSampleSender extends BatchSampleSender {
             LOGGER.debug("Sent Test End to Influx");
         }
         try {
-            LOGGER.info("Gracefully Terminate Scheduler. Timeout: {}", TERMINATE_TIMEOUT);
+            LOGGER.info("Gracefully Terminate Scheduler. Timeout: {} seconds", TERMINATE_TIMEOUT);
             if (scheduler.awaitTermination(TERMINATE_TIMEOUT, TimeUnit.SECONDS)) {
                 influxClientProxy.closeClient();
                 LOGGER.info("Influx Client closed!");
