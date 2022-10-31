@@ -46,6 +46,8 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CLASS_NAME);
 
+    private static final long TERMINATE_TIMEOUT = Long.MAX_VALUE;
+
     private String influxConnectionUrl;
 
     private String influxToken;
@@ -86,7 +88,7 @@ public class InfluxSampleSender extends BatchSampleSender {
      * reflection found in {@link SampleSenderFactory}. If configurations are sent
      * from mater, this Sender will be configured from there and then sent to the slave
      * along with configured properties. Otherwise, its properties are configured in the
-     * {@link #readResolve()} magic method.
+     * {@code readResolve()} magic method.
      */
     public InfluxSampleSender(RemoteSampleListener listener) {
         super(listener);
@@ -105,7 +107,7 @@ public class InfluxSampleSender extends BatchSampleSender {
             testResultMeasure.writeTestResult(e.getResult());
             LOGGER.debug("Sent Test Result to Influx");
         } else {
-            LOGGER.warn("No Influx Configuration found. Cannot send measure to Influx!");
+            LOGGER.warn("No Measure found. Cannot send measure to Influx!");
         }
         super.sampleOccurred(e);
         LOGGER.debug("Sent Test Result to Master.");
@@ -117,10 +119,17 @@ public class InfluxSampleSender extends BatchSampleSender {
             testStateMeasure.writeFinishState();
             LOGGER.debug("Sent Test End to Influx");
         }
-        scheduler.shutdown();
-        LOGGER.debug("Scheduler for User Metric Shut down");
-        influxClientProxy.closeClient();
-        LOGGER.debug("Influx Client closed!");
+        try {
+            LOGGER.info("Gracefully Terminate Scheduler. Timeout: {}", TERMINATE_TIMEOUT);
+            if (scheduler.awaitTermination(TERMINATE_TIMEOUT, TimeUnit.SECONDS)) {
+                influxClientProxy.closeClient();
+                LOGGER.info("Influx Client closed!");
+            }
+        } catch (InterruptedException e) {
+            LOGGER.warn("Scheduler cannot be terminated!. Error: {}", e.getMessage());
+        } catch (InfluxClientException e) {
+            LOGGER.warn("Influx Client cannot be closed!. Error: {}", e.getMessage());
+        }
         super.testEnded(host);
         LOGGER.debug("Sent Test End to Master");
     }

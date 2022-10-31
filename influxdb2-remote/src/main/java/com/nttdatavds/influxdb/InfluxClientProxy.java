@@ -68,13 +68,13 @@ public class InfluxClientProxy {
         }
     }
 
-    public void closeClient() {
+    public void closeClient() throws InfluxClientException {
         try {
             singletonWriteApi.flush();
             this.singletonWriteApi.close();
             this.actualClient.close();
         } catch (InfluxException e) {
-            LOGGER.error(e.getMessage());
+            throw new InfluxClientException(e);
         }
     }
 
