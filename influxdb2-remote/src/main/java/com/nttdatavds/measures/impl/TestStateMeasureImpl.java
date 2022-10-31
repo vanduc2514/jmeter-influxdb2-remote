@@ -22,6 +22,7 @@ public class TestStateMeasureImpl extends AbstractInfluxMeasure implements TestS
                 .addTag(TestStartEndMeasurement.Tags.TYPE, TestStartEndMeasurement.Values.STARTED)
                 .addTag(TestStartEndMeasurement.Tags.NODE_NAME, hostName)
                 .addTag(TestStartEndMeasurement.Tags.TEST_NAME, testName)
+                .addTag(TestStartEndMeasurement.Tags.RUN_ID, runId)
                 .addField(TestStartEndMeasurement.Fields.PLACEHOLDER, "1");
         this.influxClientProxy.writeInfluxPoint(startPoint);
     }
