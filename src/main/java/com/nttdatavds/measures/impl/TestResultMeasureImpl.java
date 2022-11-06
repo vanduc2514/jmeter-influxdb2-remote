@@ -25,8 +25,6 @@ public class TestResultMeasureImpl extends AbstractInfluxMeasure implements Test
         String failureMessage = sampleResult.getFirstAssertionFailureMessage();
         boolean errorOccurred = failureMessage != null || hasErrorResponseCode(sampleResult);
 
-//        sampleResult.err
-
         Point resultPoint = Point.measurement(RequestMeasurement.MEASUREMENT_NAME);
 
         if (errorOccurred) {
@@ -70,8 +68,18 @@ public class TestResultMeasureImpl extends AbstractInfluxMeasure implements Test
     }
 
     private boolean hasErrorResponseCode(SampleResult sampleResult) {
-        char responseCategory = sampleResult.getResponseCode().charAt(0);
-        return responseCategory == '4' || responseCategory == '5';
+        try {
+            int responseCode = Integer.parseInt(sampleResult.getResponseCode());
+            return isErrorCode(responseCode);
+        } catch (NumberFormatException exception) {
+            // If the response code is a message
+            return true;
+        }
+    }
+
+    private boolean isErrorCode(int responseCode) {
+        int category = responseCode / 100;
+        return category == 4 || category == 5;
     }
 
     /**
