@@ -149,15 +149,15 @@ public class InfluxSampleSender extends BatchSampleSender {
         LOGGER.info(this.toString());
 
         try {
-            influxClientProxy = InfluxClientProxy.builder()
-                    .connectionUrl(influxConnectionUrl)
-                    .token(influxToken)
-                    .organization(influxOrganizationName)
-                    .bucket(influxBucketName)
-                    .writeBatchSize(writeBatchSize)
-                    .writeFlushInterval(writeFlushInterval)
-                    .writeBufferLimit(writeBufferLimit)
-                    .build();
+            influxClientProxy = InfluxClientProxy.getInstance(
+                    influxConnectionUrl,
+                    influxToken,
+                    influxOrganizationName,
+                    influxBucketName,
+                    writeBatchSize,
+                    writeFlushInterval,
+                    writeBufferLimit
+            );
         } catch (InfluxClientException clientException) {
             throw new InvalidObjectException(clientException.getMessage());
         }

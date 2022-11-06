@@ -1,6 +1,7 @@
 package com.nttdatavds.influxdb;
 
 import com.influxdb.client.InfluxDBClient;
+import com.influxdb.client.InfluxDBClientFactory;
 import com.influxdb.client.WriteApi;
 import com.influxdb.client.WriteOptions;
 import com.influxdb.client.domain.HealthCheck;
@@ -15,41 +16,106 @@ public class InfluxClientProxy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InfluxClientProxy.class);
 
+    private final String influxConnectionUrl;
+
+    private final String influxToken;
+
+    private final String influxOrganizationName;
+
+    private final String influxBucketName;
+
+    private final int writeBatchSize;
+
+    private final int writeFlushInterval;
+
+    private final int writeBufferLimit;
+
     private final InfluxDBClient actualClient;
 
     private final WriteApi singletonWriteApi;
 
-    private final String url;
+    private static volatile InfluxClientProxy INSTANCE;
 
-    public static InfluxClientProxyBuilder builder() {
-        return new InfluxClientProxyBuilder();
+    private static final Object LOCK = new Object();
+
+    public static InfluxClientProxy getInstance(String influxConnectionUrl,
+                                                String influxToken,
+                                                String influxOrganizationName,
+                                                String influxBucketName,
+                                                int writeBatchSize,
+                                                int writeFlushInterval,
+                                                int writeBufferLimit) throws InfluxClientException {
+        if (INSTANCE == null) {
+            synchronized (LOCK) {
+                if (INSTANCE == null) {
+                    INSTANCE = new InfluxClientProxy(
+                            influxConnectionUrl,
+                            influxToken,
+                            influxOrganizationName,
+                            influxBucketName,
+                            writeBatchSize,
+                            writeFlushInterval,
+                            writeBufferLimit);
+                } else if (INSTANCE.hasDifferentConfiguration(influxConnectionUrl,
+                        influxToken,
+                        influxOrganizationName,
+                        influxBucketName,
+                        writeBatchSize,
+                        writeFlushInterval,
+                        writeBufferLimit)) {
+                    INSTANCE = new InfluxClientProxy(
+                            influxConnectionUrl,
+                            influxToken,
+                            influxOrganizationName,
+                            influxBucketName,
+                            writeBatchSize,
+                            writeFlushInterval,
+                            writeBufferLimit);
+                }
+            }
+        }
+        return INSTANCE;
     }
 
-    InfluxClientProxy(InfluxDBClient actualClient,
-                      String influxConnectionUrl,
+    private InfluxClientProxy(String influxConnectionUrl,
+                      String influxToken,
+                      String influxOrganizationName,
+                      String influxBucketName,
                       int writeBatchSize,
                       int writeFlushInterval,
                       int writeBufferLimit) throws InfluxClientException {
+        this.influxConnectionUrl = influxConnectionUrl;
+        this.influxToken = influxToken;
+        this.influxOrganizationName = influxOrganizationName;
+        this.influxBucketName = influxBucketName;
+        this.writeBatchSize = writeBatchSize;
+        this.writeFlushInterval = writeFlushInterval;
+        this.writeBufferLimit = writeBufferLimit;
+        InfluxDBClient actualClient = InfluxDBClientFactory.create(
+                this.influxConnectionUrl,
+                this.influxToken.toCharArray(),
+                this.influxOrganizationName,
+                this.influxBucketName
+        );
         this.actualClient = actualClient;
         WriteOptions writeOptions = WriteOptions.builder()
-                .batchSize(writeBatchSize)
-                .flushInterval(writeFlushInterval)
-                .bufferLimit(writeBufferLimit)
+                .batchSize(this.writeBatchSize)
+                .flushInterval(this.writeFlushInterval)
+                .bufferLimit(this.writeBufferLimit)
                 .build();
         this.singletonWriteApi = actualClient.makeWriteApi(writeOptions);
-        this.url = influxConnectionUrl;
         checkHealth();
     }
 
     private void checkHealth() throws InfluxClientException {
-        LOGGER.info("Health Check to {}", url);
+        LOGGER.info("Health Check to Influx Database at {}", influxConnectionUrl);
         HealthCheck health = actualClient.health();
         HealthCheck.StatusEnum healthStatus = health.getStatus();
         if (healthStatus == null ||
                 healthStatus == HealthCheck.StatusEnum.FAIL) {
-            String pattern = "Health Check fails. {0}";
+            String pattern = "Health Check to Influx Database fails at {0}";
             throw new InfluxClientException(
-                    MessageFormat.format(pattern, url, health.getMessage())
+                    MessageFormat.format(pattern, influxConnectionUrl, health.getMessage())
             );
         }
         LOGGER.info("Influx Database health status: {}", healthStatus);
@@ -76,6 +142,22 @@ public class InfluxClientProxy {
         } catch (InfluxException e) {
             throw new InfluxClientException(e);
         }
+    }
+
+    private boolean hasDifferentConfiguration(String influxConnectionUrl,
+                                              String influxToken,
+                                              String influxOrganizationName,
+                                              String influxBucketName,
+                                              int writeBatchSize,
+                                              int writeFlushInterval,
+                                              int writeBufferLimit) {
+        return !this.influxConnectionUrl.equals(influxConnectionUrl)
+                || !this.influxToken.equals(influxToken)
+                || !this.influxOrganizationName.equals(influxOrganizationName)
+                || !this.influxBucketName.equals(influxBucketName)
+                || !(this.writeBatchSize == writeBatchSize)
+                || !(this.writeFlushInterval == writeFlushInterval)
+                || !(this.writeBufferLimit == writeBufferLimit);
     }
 
 }
