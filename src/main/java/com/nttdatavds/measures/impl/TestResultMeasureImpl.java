@@ -6,7 +6,11 @@ import com.nttdatavds.influxdb.InfluxClientProxy;
 import com.nttdatavds.measures.MeasureHelper;
 import com.nttdatavds.measures.TestResultMeasure;
 import com.nttdatavds.measures.metrics.RequestMeasurement;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.samplers.SampleResult;
+
+import java.util.Optional;
+import java.util.function.Function;
 
 public class TestResultMeasureImpl extends AbstractInfluxMeasure implements TestResultMeasure {
 
@@ -20,6 +24,7 @@ public class TestResultMeasureImpl extends AbstractInfluxMeasure implements Test
 
     @Override
     public void writeTestResult(SampleResult sampleResult) {
+        Function<Function<SampleResult, String>, String> getString = getStringValue(sampleResult);
         long latency = sampleResult.getLatency();
         long connectTime = sampleResult.getConnectTime();
         String failureMessage = sampleResult.getFirstAssertionFailureMessage();
@@ -28,7 +33,9 @@ public class TestResultMeasureImpl extends AbstractInfluxMeasure implements Test
         Point resultPoint = Point.measurement(RequestMeasurement.MEASUREMENT_NAME);
 
         if (errorOccurred) {
-            resultPoint.addTag(RequestMeasurement.Tags.ERROR_MSG, failureMessage);
+            if (failureMessage != null) {
+                resultPoint.addTag(RequestMeasurement.Tags.ERROR_MSG, failureMessage);
+            }
             if (saveErrorResponse) {
                 String errorBody = sampleResult.getResponseDataAsString();
                 if (errorBody != null && !errorBody.isEmpty()) {
@@ -43,9 +50,9 @@ public class TestResultMeasureImpl extends AbstractInfluxMeasure implements Test
         resultPoint.time(MeasureHelper.getCurrentTimeNanoSecond(), WritePrecision.NS)
                 .addTag(RequestMeasurement.Tags.TEST_NAME, testName)
                 .addTag(RequestMeasurement.Tags.RUN_ID, runId)
-                .addTag(RequestMeasurement.Tags.REQUEST_NAME, sampleResult.getSampleLabel())
+                .addTag(RequestMeasurement.Tags.REQUEST_NAME, getString.apply(SampleResult::getSampleLabel))
                 .addTag(RequestMeasurement.Tags.NODE_NAME, hostName)
-                .addTag(RequestMeasurement.Tags.RESULT_CODE, sampleResult.getResponseCode())
+                .addTag(RequestMeasurement.Tags.RESULT_CODE, getString.apply(SampleResult::getResponseCode))
                 .addField(RequestMeasurement.Fields.ERROR_COUNT, sampleResult.getErrorCount())
                 .addField(RequestMeasurement.Fields.REQUEST_COUNT, sampleResult.getSampleCount())
                 .addField(RequestMeasurement.Fields.RECEIVED_BYTES, sampleResult.getBytesAsLong())
@@ -65,6 +72,12 @@ public class TestResultMeasureImpl extends AbstractInfluxMeasure implements Test
             }
         }
 
+    }
+
+    private Function<Function<SampleResult, String>, String> getStringValue(SampleResult sampleResult) {
+        return extractor -> Optional.ofNullable(sampleResult)
+                .map(extractor)
+                .orElse(StringUtils.EMPTY);
     }
 
     private boolean hasErrorResponseCode(SampleResult sampleResult) {

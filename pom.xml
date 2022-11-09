@@ -32,7 +32,7 @@
             <!-- This dependency is provided by Jmeter at runtime -->
             <groupId>com.influxdb</groupId>
             <artifactId>influxdb-client-java</artifactId>
-            <version>3.4.0</version>
+            <version>6.6.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
