@@ -214,7 +214,7 @@ public class InfluxSampleSender extends BatchSampleSender {
     public String toString() {
         return "{"
                 + "\"masterConfiguration\":\"" + isClientConfigured() + "\""
-                + "\"influxConnectionUrl\":\"" + influxConnectionUrl + "\""
+                + ", \"influxConnectionUrl\":\"" + influxConnectionUrl + "\""
                 + ", \"influxOrganizationName\":\"" + influxOrganizationName + "\""
                 + ", \"influxBucketName\":\"" + influxBucketName + "\""
                 + ", \"testName\":\"" + testName + "\""
