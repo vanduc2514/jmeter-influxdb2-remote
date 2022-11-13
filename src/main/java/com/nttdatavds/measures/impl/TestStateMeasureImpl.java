@@ -7,6 +7,7 @@ import com.nttdatavds.measures.MeasureHelper;
 import com.nttdatavds.measures.TestStateMeasure;
 import com.nttdatavds.measures.metrics.TestStartEndMeasurement;
 import com.nttdatavds.measures.metrics.VirtualUsersMeasurement;
+import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.visualizers.backend.UserMetric;
 
 public class TestStateMeasureImpl extends AbstractInfluxMeasure implements TestStateMeasure {
@@ -43,8 +44,12 @@ public class TestStateMeasureImpl extends AbstractInfluxMeasure implements TestS
     public void writeUserMetric(UserMetric userMetric) {
         Point userPoint = Point.measurement(VirtualUsersMeasurement.MEASUREMENT_NAME)
                 .time(MeasureHelper.getCurrentTimeMilliSecond(), WritePrecision.MS)
-                .addField(VirtualUsersMeasurement.Fields.STARTED_THREADS, userMetric.getStartedThreads())
-                .addField(VirtualUsersMeasurement.Fields.FINISHED_THREADS, userMetric.getFinishedThreads())
+                .addField(VirtualUsersMeasurement.Fields.ACTIVE_THREADS,
+                        JMeterContextService.getThreadCounts().activeThreads)
+                .addField(VirtualUsersMeasurement.Fields.STARTED_THREADS,
+                        JMeterContextService.getThreadCounts().startedThreads)
+                .addField(VirtualUsersMeasurement.Fields.FINISHED_THREADS,
+                        JMeterContextService.getThreadCounts().finishedThreads)
                 .addTag(VirtualUsersMeasurement.Tags.NODE_NAME, this.hostName)
                 .addTag(VirtualUsersMeasurement.Tags.TEST_NAME, this.testName)
                 .addTag(VirtualUsersMeasurement.Tags.RUN_ID, this.runId);
