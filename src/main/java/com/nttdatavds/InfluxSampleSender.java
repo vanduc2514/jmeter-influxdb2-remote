@@ -98,7 +98,8 @@ public class InfluxSampleSender extends BatchSampleSender {
         } else {
             LOGGER.info("Use slave configuration for this run");
         }
-        LOGGER.info(this.toString());
+        String configuration = this.toString();
+        LOGGER.info(configuration);
     }
 
     @Override
@@ -127,6 +128,7 @@ public class InfluxSampleSender extends BatchSampleSender {
                 LOGGER.info("Influx Client closed!");
             }
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             LOGGER.warn("Scheduler cannot be terminated!. Error: {}", e.getMessage());
         } catch (InfluxClientException e) {
             LOGGER.warn("Influx Client cannot be closed!. Error: {}", e.getMessage());
@@ -146,7 +148,8 @@ public class InfluxSampleSender extends BatchSampleSender {
             configurePlugin();
             LOGGER.info("Use slave configuration for this run");
         }
-        LOGGER.info(this.toString());
+        String configuration = this.toString();
+        LOGGER.info(configuration);
 
         try {
             influxClientProxy = InfluxClientProxy.getInstance(
