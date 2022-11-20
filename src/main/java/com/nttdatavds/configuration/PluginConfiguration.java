@@ -3,6 +3,10 @@ package com.nttdatavds.configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.util.JMeterUtils;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
 /**
  * Class to acquire Configuration for this Plugin from <b>.properties</b> file
  * or from the properties given by the command line option using {@link JMeterUtils}.
@@ -19,6 +23,9 @@ public class PluginConfiguration {
     public static final String DEFAULT_TEST_NAME = "Jmeter_TestPlan_Default";
     public static final String DEFAULT_RUN_ID = "R001";
     public static final String EMPTY = StringUtils.EMPTY;
+    public static final String THREAD_GROUP_DELIMITER = ",";
+    public static final List<String> DEFAULT_EXCLUDED_THREAD_GROUP = Arrays.asList(
+            "setUp Thread Group", "tearDown Thread Group");
 
     private PluginConfiguration() throws IllegalAccessException {
         throw new IllegalAccessException("Utility class can't be instantiated");
@@ -78,6 +85,16 @@ public class PluginConfiguration {
      */
     public static boolean saveErrorResponse() {
         return JMeterUtils.getPropDefault("measure.save.error", false);
+    }
+
+    /**
+     * @return The excluded Thread Groups, which won't send the result to influxDB.
+     * Default value is {@link #DEFAULT_EXCLUDED_THREAD_GROUP}
+     */
+    public static List<String> excludedThreadGroups() {
+        return Optional.ofNullable(JMeterUtils.getProperty("excluded.thread.groups"))
+                .map(commaValues -> Arrays.asList(commaValues.split(THREAD_GROUP_DELIMITER)))
+                .orElse(DEFAULT_EXCLUDED_THREAD_GROUP);
     }
 
     /**

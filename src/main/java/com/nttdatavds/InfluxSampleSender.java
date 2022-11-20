@@ -28,9 +28,6 @@ import org.apache.jmeter.samplers.RemoteSampleListener;
 import org.apache.jmeter.samplers.SampleEvent;
 import org.apache.jmeter.samplers.SampleSenderFactory;
 import org.apache.jmeter.threads.JMeterContextService;
-import org.apache.jmeter.threads.PostThreadGroup;
-import org.apache.jmeter.threads.SetupThreadGroup;
-import org.apache.jmeter.threads.ThreadGroup;
 import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jmeter.visualizers.backend.UserMetric;
 import org.slf4j.Logger;
@@ -38,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InvalidObjectException;
 import java.io.ObjectStreamException;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -72,6 +70,8 @@ public class InfluxSampleSender extends BatchSampleSender {
     private boolean measureSubResult;
 
     private boolean saveErrorResponse;
+
+    private List<String> excludedThreadGroups;
 
     private int userMetricPoolSize;
 
@@ -114,8 +114,8 @@ public class InfluxSampleSender extends BatchSampleSender {
     @Override
     public void sampleOccurred(SampleEvent e) {
         // Ignore SetupThreadGroup and PostThreadGroup
-        if (!(JMeterContextService.getContext().getThreadGroup() instanceof SetupThreadGroup
-                || JMeterContextService.getContext().getThreadGroup() instanceof PostThreadGroup)) {
+        String threadGroupName = JMeterContextService.getContext().getThreadGroup().getName();
+        if (!inExcludedGroups(threadGroupName)) {
             testResultMeasure.writeTestResult(e.getResult());
             LOGGER.debug("Sent Test Result to Influx");
             super.sampleOccurred(e);
@@ -218,6 +218,15 @@ public class InfluxSampleSender extends BatchSampleSender {
         writeBatchSize = PluginConfiguration.writeBatchSize();
         writeFlushInterval = PluginConfiguration.writeFlushInterval();
         writeBufferLimit = PluginConfiguration.writeBufferLimit();
+        excludedThreadGroups = PluginConfiguration.excludedThreadGroups();
+    }
+
+    /**
+     * @return {@code true} if the current thread in excluded group, which
+     * this plugin does not send the result to InfluxDB
+     */
+    private boolean inExcludedGroups(String threadGroupName) {
+        return excludedThreadGroups.contains(threadGroupName);
     }
 
     // Log Configuration as JSON
