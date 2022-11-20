@@ -27,6 +27,9 @@ import org.apache.jmeter.samplers.BatchSampleSender;
 import org.apache.jmeter.samplers.RemoteSampleListener;
 import org.apache.jmeter.samplers.SampleEvent;
 import org.apache.jmeter.samplers.SampleSenderFactory;
+import org.apache.jmeter.threads.AbstractThreadGroup;
+import org.apache.jmeter.threads.JMeterContextService;
+import org.apache.jmeter.threads.ThreadGroup;
 import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jmeter.visualizers.backend.UserMetric;
 import org.slf4j.Logger;
@@ -104,14 +107,13 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     @Override
     public void sampleOccurred(SampleEvent e) {
-        if (testResultMeasure != null) {
+        // Ignore SetupThreadGroup and PostThreadGroup
+        if (JMeterContextService.getContext().getThreadGroup() instanceof ThreadGroup) {
             testResultMeasure.writeTestResult(e.getResult());
             LOGGER.debug("Sent Test Result to Influx");
-        } else {
-            LOGGER.warn("No Measure found. Cannot send measure to Influx!");
+            super.sampleOccurred(e);
+            LOGGER.debug("Sent Test Result to Master.");
         }
-        super.sampleOccurred(e);
-        LOGGER.debug("Sent Test Result to Master.");
     }
 
     @Override
