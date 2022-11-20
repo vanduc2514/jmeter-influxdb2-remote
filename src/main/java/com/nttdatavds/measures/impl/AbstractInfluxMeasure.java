@@ -2,8 +2,6 @@ package com.nttdatavds.measures.impl;
 
 import com.nttdatavds.influxdb.InfluxClientProxy;
 
-import java.util.Optional;
-
 public abstract class AbstractInfluxMeasure {
 
     protected InfluxClientProxy influxClientProxy;
