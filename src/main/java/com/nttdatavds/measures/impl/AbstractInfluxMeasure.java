@@ -28,17 +28,17 @@ public abstract class AbstractInfluxMeasure {
         }
 
         public T hostName(String hostName) {
-            measure.hostName = safelyGet("host-name", hostName);
+            measure.hostName = hostName;
             return builder();
         }
 
         public T testName(String testName) {
-            measure.testName = safelyGet("test-name", testName);
+            measure.testName = testName;
             return builder();
         }
 
         public T testRunId(String runId) {
-            measure.runId = safelyGet("run-id", runId);
+            measure.runId = runId;
             return builder();
         }
 
@@ -47,10 +47,6 @@ public abstract class AbstractInfluxMeasure {
         }
 
         protected abstract T builder();
-
-        protected String safelyGet(String propertyName, String value) {
-            return Optional.ofNullable(value).orElse("dummy-" + propertyName);
-        }
 
     }
 
