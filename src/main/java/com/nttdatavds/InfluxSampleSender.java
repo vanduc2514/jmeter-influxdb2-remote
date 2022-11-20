@@ -40,6 +40,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * {@link org.apache.jmeter.samplers.SampleSender} which send the Test Result
+ * contains Sample Data and Test State contains Virtual User metric and test start,
+ * test finish.
+ */
 public class InfluxSampleSender extends BatchSampleSender {
 
     private static final long serialVersionUID = 3371144997364645511L;

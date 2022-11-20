@@ -9,26 +9,29 @@ import com.influxdb.exceptions.InfluxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.MessageFormat;
-
+/**
+ * Proxy for {@link InfluxDBClient} which exposes methods for interacting with InfluxDB
+ */
 public class InfluxClientProxy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InfluxClientProxy.class);
 
-    private final String influxConnectionUrl;
-
     private final InfluxDBClient actualClient;
+
 
     private final WriteApi singletonWriteApi;
 
     private InfluxClientProxy(InfluxDBClient actualClient,
-                              WriteOptions writeOptions,
-                              String influxConnectionUrl) {
+                              WriteOptions writeOptions) {
         this.actualClient = actualClient;
         this.singletonWriteApi = actualClient.makeWriteApi(writeOptions);
-        this.influxConnectionUrl = influxConnectionUrl;
     }
 
+    /**
+     * Make a new proxy instance.
+     *
+     * @throws InfluxClientException if the Influx Database cannot be accessed.
+     */
     public static InfluxClientProxy make(String influxConnectionUrl,
                                          char[] influxToken,
                                          String influxOrganizationName,
@@ -41,31 +44,30 @@ public class InfluxClientProxy {
                 influxToken,
                 influxOrganizationName,
                 influxBucketName
-        );
+        ).enableGzip();
         WriteOptions writeOptions = WriteOptions.builder()
                 .batchSize(writeBatchSize)
                 .flushInterval(writeFlushInterval)
                 .bufferLimit(writeBufferLimit)
                 .build();
-        final InfluxClientProxy INSTANCE = new InfluxClientProxy(
-                influxClient, writeOptions, influxConnectionUrl);
-        INSTANCE.checkHealth();
+        final InfluxClientProxy INSTANCE = new InfluxClientProxy(influxClient, writeOptions);
+        INSTANCE.checkConnection();
         return INSTANCE;
     }
 
-    private void checkHealth() throws InfluxClientException {
-        LOGGER.info("Health Check to Influx Database at {}", influxConnectionUrl);
-        Boolean health = actualClient.ping();
-        if (Boolean.FALSE.equals(health)) {
-            String pattern = "Health Check to Influx Database fails at {0}";
-            throw new InfluxClientException(MessageFormat.format(pattern, influxConnectionUrl));
+    private void checkConnection() throws InfluxClientException {
+        LOGGER.info("Attempt to ping Influx Database.");
+        Boolean alive = actualClient.ping();
+        if (Boolean.FALSE.equals(alive)) {
+            throw new InfluxClientException("Influx Database cannot be accessed!");
         }
         String influxVersion = actualClient.version();
-        LOGGER.info("Influx Database version {} has good health", influxVersion);
+        LOGGER.info("Influx Database version {} is accessible", influxVersion);
     }
 
     /**
      * Write values to influx Database
+     *
      * @param point the influxDb {@link Point} wrapper
      */
     public void writeInfluxPoint(Point point) {
@@ -77,6 +79,13 @@ public class InfluxClientProxy {
         }
     }
 
+    /**
+     * Flush all remaining request that needs to be sent to InfluxDB and close
+     * the actual client.
+     *
+     * @throws InfluxClientException if the request cannot be flushed or the client
+     * cannot be closed.
+     */
     public void closeClient() throws InfluxClientException {
         try {
             singletonWriteApi.flush();
