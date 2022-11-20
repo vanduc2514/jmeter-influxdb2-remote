@@ -196,22 +196,21 @@ public class InfluxSampleSender extends BatchSampleSender {
      * method is invoked from there. Otherwise, it will be invoked by slave.
      */
     private void configurePlugin() {
-        PluginConfiguration pluginConfiguration = new PluginConfiguration();
         // Test Run properties
-        influxConnectionUrl = pluginConfiguration.influxConnectionUrl();
-        influxToken = pluginConfiguration.influxToken();
-        influxOrganizationName = pluginConfiguration.influxOrganizationName();
-        influxBucketName = pluginConfiguration.influxBucketName();
-        testName = pluginConfiguration.testName();
-        testRunId = pluginConfiguration.testRunId();
-        measureSubResult = pluginConfiguration.measureSubResult();
-        saveErrorResponse = pluginConfiguration.saveErrorResponse();
+        influxConnectionUrl = PluginConfiguration.influxConnectionUrl();
+        influxToken = PluginConfiguration.influxToken();
+        influxOrganizationName = PluginConfiguration.influxOrganizationName();
+        influxBucketName = PluginConfiguration.influxBucketName();
+        testName = PluginConfiguration.testName();
+        testRunId = PluginConfiguration.testRunId();
+        measureSubResult = PluginConfiguration.measureSubResult();
+        saveErrorResponse = PluginConfiguration.saveErrorResponse();
         // Tuning properties
-        userMetricInterval = pluginConfiguration.userMetricInterval();
-        userMetricPoolSize = pluginConfiguration.userMetricPoolSize();
-        writeBatchSize = pluginConfiguration.writeBatchSize();
-        writeFlushInterval = pluginConfiguration.writeFlushInterval();
-        writeBufferLimit = pluginConfiguration.writeBufferLimit();
+        userMetricInterval = PluginConfiguration.userMetricInterval();
+        userMetricPoolSize = PluginConfiguration.userMetricPoolSize();
+        writeBatchSize = PluginConfiguration.writeBatchSize();
+        writeFlushInterval = PluginConfiguration.writeFlushInterval();
+        writeBufferLimit = PluginConfiguration.writeBufferLimit();
     }
 
     // Log Configuration as JSON
