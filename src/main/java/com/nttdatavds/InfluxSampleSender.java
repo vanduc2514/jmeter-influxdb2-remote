@@ -28,6 +28,8 @@ import org.apache.jmeter.samplers.RemoteSampleListener;
 import org.apache.jmeter.samplers.SampleEvent;
 import org.apache.jmeter.samplers.SampleSenderFactory;
 import org.apache.jmeter.threads.JMeterContextService;
+import org.apache.jmeter.threads.PostThreadGroup;
+import org.apache.jmeter.threads.SetupThreadGroup;
 import org.apache.jmeter.threads.ThreadGroup;
 import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jmeter.visualizers.backend.UserMetric;
@@ -112,7 +114,8 @@ public class InfluxSampleSender extends BatchSampleSender {
     @Override
     public void sampleOccurred(SampleEvent e) {
         // Ignore SetupThreadGroup and PostThreadGroup
-        if (JMeterContextService.getContext().getThreadGroup() instanceof ThreadGroup) {
+        if (!(JMeterContextService.getContext().getThreadGroup() instanceof SetupThreadGroup
+                || JMeterContextService.getContext().getThreadGroup() instanceof PostThreadGroup)) {
             testResultMeasure.writeTestResult(e.getResult());
             LOGGER.debug("Sent Test Result to Influx");
             super.sampleOccurred(e);
