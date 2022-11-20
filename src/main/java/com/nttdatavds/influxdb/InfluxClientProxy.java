@@ -4,7 +4,6 @@ import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.InfluxDBClientFactory;
 import com.influxdb.client.WriteApi;
 import com.influxdb.client.WriteOptions;
-import com.influxdb.client.domain.HealthCheck;
 import com.influxdb.client.write.Point;
 import com.influxdb.exceptions.InfluxException;
 import org.slf4j.Logger;
@@ -18,67 +17,40 @@ public class InfluxClientProxy {
 
     private final String influxConnectionUrl;
 
-    private final String influxToken;
-
-    private final String influxOrganizationName;
-
-    private final String influxBucketName;
-
-    private final int writeBatchSize;
-
-    private final int writeFlushInterval;
-
-    private final int writeBufferLimit;
-
     private final InfluxDBClient actualClient;
 
     private final WriteApi singletonWriteApi;
 
-    public static InfluxClientProxy getInstance(String influxConnectionUrl,
-                                                String influxToken,
-                                                String influxOrganizationName,
-                                                String influxBucketName,
-                                                int writeBatchSize,
-                                                int writeFlushInterval,
-                                                int writeBufferLimit) throws InfluxClientException {
-        return new InfluxClientProxy(
+    private InfluxClientProxy(InfluxDBClient actualClient,
+                              WriteOptions writeOptions,
+                              String influxConnectionUrl) {
+        this.actualClient = actualClient;
+        this.singletonWriteApi = actualClient.makeWriteApi(writeOptions);
+        this.influxConnectionUrl = influxConnectionUrl;
+    }
+
+    public static InfluxClientProxy make(String influxConnectionUrl,
+                                         char[] influxToken,
+                                         String influxOrganizationName,
+                                         String influxBucketName,
+                                         int writeBatchSize,
+                                         int writeFlushInterval,
+                                         int writeBufferLimit) throws InfluxClientException {
+        InfluxDBClient influxClient = InfluxDBClientFactory.create(
                 influxConnectionUrl,
                 influxToken,
                 influxOrganizationName,
-                influxBucketName,
-                writeBatchSize,
-                writeFlushInterval,
-                writeBufferLimit);
-    }
-
-    private InfluxClientProxy(String influxConnectionUrl,
-                      String influxToken,
-                      String influxOrganizationName,
-                      String influxBucketName,
-                      int writeBatchSize,
-                      int writeFlushInterval,
-                      int writeBufferLimit) throws InfluxClientException {
-        this.influxConnectionUrl = influxConnectionUrl;
-        this.influxToken = influxToken;
-        this.influxOrganizationName = influxOrganizationName;
-        this.influxBucketName = influxBucketName;
-        this.writeBatchSize = writeBatchSize;
-        this.writeFlushInterval = writeFlushInterval;
-        this.writeBufferLimit = writeBufferLimit;
-        InfluxDBClient influxClient = InfluxDBClientFactory.create(
-                this.influxConnectionUrl,
-                this.influxToken.toCharArray(),
-                this.influxOrganizationName,
-                this.influxBucketName
+                influxBucketName
         );
-        this.actualClient = influxClient;
         WriteOptions writeOptions = WriteOptions.builder()
-                .batchSize(this.writeBatchSize)
-                .flushInterval(this.writeFlushInterval)
-                .bufferLimit(this.writeBufferLimit)
+                .batchSize(writeBatchSize)
+                .flushInterval(writeFlushInterval)
+                .bufferLimit(writeBufferLimit)
                 .build();
-        this.singletonWriteApi = influxClient.makeWriteApi(writeOptions);
-        checkHealth();
+        final InfluxClientProxy INSTANCE = new InfluxClientProxy(
+                influxClient, writeOptions, influxConnectionUrl);
+        INSTANCE.checkHealth();
+        return INSTANCE;
     }
 
     private void checkHealth() throws InfluxClientException {

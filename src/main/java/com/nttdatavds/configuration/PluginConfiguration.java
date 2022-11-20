@@ -54,13 +54,8 @@ public class PluginConfiguration {
      * @return access token to connect InfluxDB, converted to {@link char[]}.
      * Default value is empty array.
      */
-    public static char[] influxTokenNew() {
+    public static char[] influxToken() {
         return JMeterUtils.getPropDefault("influxdb.token", EMPTY).toCharArray();
-    }
-
-    @Deprecated
-    public static String influxToken() {
-        return JMeterUtils.getPropDefault("influxdb.token", EMPTY);
     }
 
     /**

@@ -27,7 +27,6 @@ import org.apache.jmeter.samplers.BatchSampleSender;
 import org.apache.jmeter.samplers.RemoteSampleListener;
 import org.apache.jmeter.samplers.SampleEvent;
 import org.apache.jmeter.samplers.SampleSenderFactory;
-import org.apache.jmeter.threads.AbstractThreadGroup;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.ThreadGroup;
 import org.apache.jmeter.util.JMeterUtils;
@@ -53,11 +52,11 @@ public class InfluxSampleSender extends BatchSampleSender {
 
     private String influxConnectionUrl;
 
-    private String influxToken;
-
     private String influxOrganizationName;
 
     private String influxBucketName;
+
+    private char[] influxToken;
 
     private String testName;
 
@@ -154,7 +153,7 @@ public class InfluxSampleSender extends BatchSampleSender {
         LOGGER.info(configuration);
 
         try {
-            influxClientProxy = InfluxClientProxy.getInstance(
+            influxClientProxy = InfluxClientProxy.make(
                     influxConnectionUrl,
                     influxToken,
                     influxOrganizationName,
@@ -198,9 +197,9 @@ public class InfluxSampleSender extends BatchSampleSender {
     private void configurePlugin() {
         // Test Run properties
         influxConnectionUrl = PluginConfiguration.influxConnectionUrl();
-        influxToken = PluginConfiguration.influxToken();
         influxOrganizationName = PluginConfiguration.influxOrganizationName();
         influxBucketName = PluginConfiguration.influxBucketName();
+        influxToken = PluginConfiguration.influxToken();
         testName = PluginConfiguration.testName();
         testRunId = PluginConfiguration.testRunId();
         measureSubResult = PluginConfiguration.measureSubResult();
