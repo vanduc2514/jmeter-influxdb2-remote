@@ -1,4 +1,4 @@
-FROM openjdk:11.0.4-jre-slim
+FROM eclipse-temurin:11.0.15_10-jre-jammy
 
 ARG JMETER_VERSION
 
@@ -19,8 +19,8 @@ RUN wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-$JMETER_V
 # Enable debug
 ENV JVM_ARGS -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000
 
-# Add slave configuration in distrubuted testing
-COPY user.properties ./bin
+# Add pre configuration file
+COPY jmeter.properties /jmeter/apache-jmeter-5.4.1/bin
 
 EXPOSE 1099 50000 60000 8000
 

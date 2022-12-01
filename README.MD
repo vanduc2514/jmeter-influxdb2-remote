@@ -17,24 +17,25 @@ Install the plugin to `${JMETER_HOME}/lib/ext` on master and each slave machine
 > before continue
 
 ```properties
-# Remote properties
-# Specific the SampleSender class to let remote machine directly send to Influx Database
-# Ignore this property if the test is not running in distributed mode
-mode=org.ifisolution.plugins.samplers.InfluxSampleSender
+# Mandatory properties
+# Use this InfluxSampleSender to send test result to Influx Database before send it to master machine.
+# Exclude this property will disable this plugin.
+mode=com.nttdatavds.plugins.samplers.InfluxSampleSender
 
-# Plugin properties
-# Setting this to true to let the master send test result to Influx Database
-master_send_result=
+# Test Specific properties
+# Set the name of the thread groups (comma separated value), which should be excluded from the result sent to Influx Database
+# By default, the excluded groups is ["setUp Thread Group", "tearDown Thread Group"]
+excluded.thread.groups=
 
 # Test Specific properties
 # Set the option to save error response to true/false
 # By default, this plugin never save error response to reduce workload
-save_error_response=
+measure.save.error=
 
 # Test Specific properties
 # Set the option to save sub result from sample result 
 # By default, this property is set to true
-save_measure_sub_result=
+measure.sub.result=
 
 # Test Specific properties
 # The test name that appears in Influx
@@ -71,15 +72,36 @@ influxdb.bucket=
 # Setting this to blank or ignore it will use the default http connection
 influxdb.ssl.enable=
 
+# Optimization properties
+# The time for each virtual user metric sent to Influx in second
+# Default value is 1 second
+measure.user.interval=
+
+# Optimization properties
+# The size of the executor used for sending virtual user metric in multi thread environment.
+# Default value is 10 threads available in pool
+measure.user.pool=
+
+# Optimization properties
+# The size of the batching result sent to Influx Database. 
+# Default is 1000 results
+write.batch=
+
+# Optimization properties
+# The time for each request sent to Influx in millisecond
+# Default value is 1000 millisecond
+write.flush.interval=
+
+# Optimization properties
+# The limitation of the buffer used for sending result to Influx Database
+# Default is 10000
+write.buffer.limit=
 ```
 
-This plugin can be configured from the master machine or configured on master and each slave machine
+### Usage
 
-### Configure from the master machine
-
-Create a new `.properties` file with the above properties and execute the test plan from the master machine with
-`-q path_to_created_property_file` and `-G path_to_created_property_file` option. For more information, refers
-to [Override Jmeter Properties](https://jmeter.apache.org/usermanual/get-started.html#override).
+Execute the test plan from the master machine with `-q` option and the `.properties` file contains above properties. 
+For more information, refers to [Override Jmeter Properties](https://jmeter.apache.org/usermanual/get-started.html#override).
 
 For example:
 
@@ -87,23 +109,6 @@ For example:
 jmeter -n -t Example-Apache-Jmeter-Plan.jmx -G influx.properties -q influx.properties -r
 
 ```
-
-> Properties file should be the same. This file will apply the configuration for both master and slave machine(s)
-
-### Or Configure on each machine
-
-Add the above properties to `user.properties` (found in `${JMETER_HOME}/bin`) for master and each slave machine
-then restart Jmeter.
-
-## Usage
-
-This plugin comes with a `InfluxSampleSender` for sending Test Result directly to Influxdb from the slave machine 
-and a BackendListenerClient for monitoring the Virtual users, Test-start and Test-end from the master machine. 
-To do so, select the `InfluxTestStateListener` for Backend Listener implementation from the drop-down list.
-
-![jmeter](https://github.com/vanduc2514/jmeter-influxdb2-remote/raw/master/image/jmeter.png)
-
-After that, execute the test then verify it in Influx.
 
 ### Development
 
