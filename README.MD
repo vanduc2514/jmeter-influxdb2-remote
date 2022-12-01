@@ -106,7 +106,7 @@ For more information, refers to [Override Jmeter Properties](https://jmeter.apac
 For example:
 
 ```shell
-jmeter -n -t Example-Apache-Jmeter-Plan.jmx -G influx.properties -q influx.properties -r
+jmeter -n -r -t Example-Apache-Jmeter-Plan.jmx -q influx.properties
 
 ```
 
