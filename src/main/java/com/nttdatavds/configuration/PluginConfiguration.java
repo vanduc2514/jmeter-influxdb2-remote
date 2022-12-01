@@ -20,11 +20,11 @@ import java.util.Optional;
  */
 public class PluginConfiguration {
 
-    public static final String DEFAULT_TEST_NAME = "Jmeter_TestPlan_Default";
-    public static final String DEFAULT_RUN_ID = "R001";
-    public static final String EMPTY = StringUtils.EMPTY;
-    public static final String THREAD_GROUP_DELIMITER = ",";
-    public static final List<String> DEFAULT_EXCLUDED_THREAD_GROUP = Arrays.asList(
+    private static final String DEFAULT_TEST_NAME = "Jmeter_TestPlan_Default";
+    private static final String DEFAULT_RUN_ID = "R001";
+    private static final String EMPTY = StringUtils.EMPTY;
+    private static final String THREAD_GROUP_DELIMITER = ",";
+    private static final List<String> DEFAULT_EXCLUDED_THREAD_GROUP = Arrays.asList(
             "setUp Thread Group", "tearDown Thread Group");
 
     private PluginConfiguration() throws IllegalAccessException {
@@ -80,14 +80,6 @@ public class PluginConfiguration {
     }
 
     /**
-     * @return true if the Plugin is allowed to send the response of error request to InfluxDB.
-     * Default value is {@code false}
-     */
-    public static boolean saveErrorResponse() {
-        return JMeterUtils.getPropDefault("measure.save.error", false);
-    }
-
-    /**
      * @return The excluded Thread Groups, which won't send the result to influxDB.
      * Default value is {@link #DEFAULT_EXCLUDED_THREAD_GROUP}
      */
@@ -95,6 +87,14 @@ public class PluginConfiguration {
         return Optional.ofNullable(JMeterUtils.getProperty("excluded.thread.groups"))
                 .map(commaValues -> Arrays.asList(commaValues.split(THREAD_GROUP_DELIMITER)))
                 .orElse(DEFAULT_EXCLUDED_THREAD_GROUP);
+    }
+
+    /**
+     * @return true if the Plugin is allowed to send the response of error request to InfluxDB.
+     * Default value is {@code false}
+     */
+    public static boolean saveErrorResponse() {
+        return JMeterUtils.getPropDefault("measure.save.error", false);
     }
 
     /**
