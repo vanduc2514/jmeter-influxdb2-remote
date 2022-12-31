@@ -27,6 +27,8 @@ import org.apache.jmeter.samplers.BatchSampleSender;
 import org.apache.jmeter.samplers.RemoteSampleListener;
 import org.apache.jmeter.samplers.SampleEvent;
 import org.apache.jmeter.samplers.SampleSenderFactory;
+import org.apache.jmeter.threads.AbstractThreadGroup;
+import org.apache.jmeter.threads.JMeterContext;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jmeter.visualizers.backend.UserMetric;
@@ -114,20 +116,23 @@ public class InfluxSampleSender extends BatchSampleSender {
     @Override
     public void sampleOccurred(SampleEvent e) {
         // Ignore SetupThreadGroup and PostThreadGroup
-        String threadGroupName = JMeterContextService.getContext().getThreadGroup().getName();
+        JMeterContext jMeterContext = JMeterContextService.getContext();
+        String threadGroupName = jMeterContext.getThreadGroup().getName();
         if (!inExcludedGroups(threadGroupName)) {
             testResultMeasure.writeTestResult(e.getResult());
-            LOGGER.debug("Sent Test Result to Influx");
+            String threadName = jMeterContext.getThread().getThreadName();
+            LOGGER.info("Write Test Result to Influx from Thread {} ", threadName);
             super.sampleOccurred(e);
-            LOGGER.debug("Sent Test Result to Master.");
+            LOGGER.info("Write Test Result to Master from Thread {}", threadName);
         }
     }
 
     @Override
     public void testEnded(String host) {
+        String threadName = JMeterContextService.getContext().getThread().getThreadName();
         if (testStateMeasure != null) {
             testStateMeasure.writeFinishState();
-            LOGGER.debug("Sent Test End to Influx");
+            LOGGER.info("Write Test End to Influx from Thread {}", threadName);
         }
         try {
             LOGGER.info("Gracefully Terminate Scheduler. Timeout: {} seconds", TERMINATE_TIMEOUT);
@@ -143,7 +148,7 @@ public class InfluxSampleSender extends BatchSampleSender {
             LOGGER.warn("Influx Client cannot be closed!. Error: {}", e.getMessage());
         }
         super.testEnded(host);
-        LOGGER.debug("Sent Test End to Master");
+        LOGGER.info("Write Test End to Master from Thread {}", threadName);
     }
 
     /**
@@ -188,11 +193,12 @@ public class InfluxSampleSender extends BatchSampleSender {
                 .build();
         scheduler = Executors.newScheduledThreadPool(userMetricPoolSize);
 
+        String threadName = JMeterContextService.getContext().getThread().getThreadName();
         testStateMeasure.writeStartState();
-        LOGGER.debug("Sent Test Start to Influx");
+        LOGGER.info("Write Test Start to Influx from Thread {}", threadName);
         scheduler.scheduleAtFixedRate(() -> {
             testStateMeasure.writeUserMetric(new UserMetric());
-            LOGGER.debug("Sent User Metric to Influx");
+            LOGGER.info("Write User Metric to Influx from Thread {}", threadName);
         }, 1, userMetricInterval, TimeUnit.SECONDS);
 
         return this;
@@ -226,6 +232,7 @@ public class InfluxSampleSender extends BatchSampleSender {
      * this plugin does not send the result to InfluxDB
      */
     private boolean inExcludedGroups(String threadGroupName) {
+        // TODO: Fix a bug does not exclude Thread Group if name contains postfix number
         return excludedThreadGroups.contains(threadGroupName);
     }
 
