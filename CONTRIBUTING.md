@@ -46,7 +46,7 @@ Your efforts are highly appreciated, and I'm excited to work together to enhance
 
 ## Issues and Bug Reports
 
-If you come across a bug or have an idea for an improvement but don't have the time to implement it yourself, don't hesitate to [open an issue](https://github.com/your-username/your-forked-repo/issues). Provide as much detail as possible, including steps to reproduce the issue.
+If you come across a bug or have an idea for an improvement but don't have the time to implement it yourself, don't hesitate to [open an issue](https://github.com/vanduc2514/jmeter-influxdb2-remote/issues). Provide as much detail as possible, including steps to reproduce the issue.
 
 ## Community Guidelines
 
