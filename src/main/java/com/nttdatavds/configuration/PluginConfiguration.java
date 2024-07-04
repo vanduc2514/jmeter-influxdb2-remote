@@ -1,4 +1,4 @@
-package com.nttdatavds.configuration;
+package com.github.vanduc2514.configuration;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.util.JMeterUtils;

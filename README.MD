@@ -20,7 +20,7 @@ Install the plugin to `${JMETER_HOME}/lib/ext` on master and each slave machine
 # Mandatory properties
 # Use this InfluxSampleSender to send test result to Influx Database before send it to master machine.
 # Exclude this property will disable this plugin.
-mode=com.nttdatavds.plugins.samplers.InfluxSampleSender
+mode=com.github.vanduc2514.plugins.samplers.InfluxSampleSender
 
 # Test Specific properties
 # Set the name of the thread groups (comma separated value), which should be excluded from the result sent to Influx Database

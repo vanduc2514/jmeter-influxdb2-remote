@@ -1,11 +1,11 @@
-package com.nttdatavds.measures.impl;
+package com.github.vanduc2514.measures.impl;
 
 import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
-import com.nttdatavds.influxdb.InfluxClientProxy;
-import com.nttdatavds.measures.MeasureHelper;
-import com.nttdatavds.measures.TestResultMeasure;
-import com.nttdatavds.measures.metrics.RequestMeasurement;
+import com.github.vanduc2514.influxdb.InfluxClientProxy;
+import com.github.vanduc2514.measures.MeasureHelper;
+import com.github.vanduc2514.measures.TestResultMeasure;
+import com.github.vanduc2514.measures.metrics.RequestMeasurement;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.samplers.SampleResult;
 

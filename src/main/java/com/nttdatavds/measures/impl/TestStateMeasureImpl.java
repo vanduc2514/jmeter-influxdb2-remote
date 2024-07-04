@@ -1,12 +1,12 @@
-package com.nttdatavds.measures.impl;
+package com.github.vanduc2514.measures.impl;
 
 import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
-import com.nttdatavds.influxdb.InfluxClientProxy;
-import com.nttdatavds.measures.MeasureHelper;
-import com.nttdatavds.measures.TestStateMeasure;
-import com.nttdatavds.measures.metrics.TestStartEndMeasurement;
-import com.nttdatavds.measures.metrics.VirtualUsersMeasurement;
+import com.github.vanduc2514.influxdb.InfluxClientProxy;
+import com.github.vanduc2514.measures.MeasureHelper;
+import com.github.vanduc2514.measures.TestStateMeasure;
+import com.github.vanduc2514.measures.metrics.TestStartEndMeasurement;
+import com.github.vanduc2514.measures.metrics.VirtualUsersMeasurement;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.visualizers.backend.UserMetric;
 

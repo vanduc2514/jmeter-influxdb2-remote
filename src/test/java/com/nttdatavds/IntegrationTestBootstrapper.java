@@ -1,4 +1,4 @@
-package com.nttdatavds;
+package com.github.vanduc2514;
 
 import org.apache.jmeter.JMeter;
 import org.apache.jmeter.engine.RemoteJMeterEngineImpl;

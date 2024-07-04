@@ -1,8 +1,8 @@
-package com.nttdatavds.measures;
+package com.github.vanduc2514.measures;
 
-import com.nttdatavds.influxdb.InfluxClientProxy;
-import com.nttdatavds.measures.impl.TestResultMeasureImpl;
-import com.nttdatavds.measures.impl.TestStateMeasureImpl;
+import com.github.vanduc2514.influxdb.InfluxClientProxy;
+import com.github.vanduc2514.measures.impl.TestResultMeasureImpl;
+import com.github.vanduc2514.measures.impl.TestStateMeasureImpl;
 
 public class Measures {
 

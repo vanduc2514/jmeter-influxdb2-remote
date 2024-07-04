@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-package com.nttdatavds;
+package com.github.vanduc2514;
 
-import com.nttdatavds.configuration.PluginConfiguration;
-import com.nttdatavds.influxdb.InfluxClientException;
-import com.nttdatavds.influxdb.InfluxClientProxy;
-import com.nttdatavds.measures.Measures;
-import com.nttdatavds.measures.TestResultMeasure;
-import com.nttdatavds.measures.TestStateMeasure;
+import com.github.vanduc2514.configuration.PluginConfiguration;
+import com.github.vanduc2514.influxdb.InfluxClientException;
+import com.github.vanduc2514.influxdb.InfluxClientProxy;
+import com.github.vanduc2514.measures.Measures;
+import com.github.vanduc2514.measures.TestResultMeasure;
+import com.github.vanduc2514.measures.TestStateMeasure;
 import org.apache.jmeter.samplers.BatchSampleSender;
 import org.apache.jmeter.samplers.RemoteSampleListener;
 import org.apache.jmeter.samplers.SampleEvent;

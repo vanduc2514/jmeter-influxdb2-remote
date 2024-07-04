@@ -1,4 +1,4 @@
-package com.nttdatavds.measures.metrics;
+package com.github.vanduc2514.measures.metrics;
 
 public interface RequestMeasurement {
 

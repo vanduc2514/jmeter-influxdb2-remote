@@ -1,6 +1,6 @@
-package com.nttdatavds.measures;
+package com.github.vanduc2514.measures;
 
-import com.nttdatavds.measures.metrics.RequestMeasurement;
+import com.github.vanduc2514.measures.metrics.RequestMeasurement;
 import org.apache.jmeter.samplers.RemoteSampleListener;
 import org.apache.jmeter.samplers.SampleResult;
 

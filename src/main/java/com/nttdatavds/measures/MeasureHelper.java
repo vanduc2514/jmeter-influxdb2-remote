@@ -1,4 +1,4 @@
-package com.nttdatavds.measures;
+package com.github.vanduc2514.measures;
 
 public class MeasureHelper {
 

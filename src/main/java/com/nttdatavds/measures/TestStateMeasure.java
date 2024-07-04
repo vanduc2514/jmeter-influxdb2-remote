@@ -1,8 +1,8 @@
-package com.nttdatavds.measures;
+package com.github.vanduc2514.measures;
 
 import com.influxdb.client.write.Point;
-import com.nttdatavds.measures.metrics.TestStartEndMeasurement;
-import com.nttdatavds.measures.metrics.VirtualUsersMeasurement;
+import com.github.vanduc2514.measures.metrics.TestStartEndMeasurement;
+import com.github.vanduc2514.measures.metrics.VirtualUsersMeasurement;
 import org.apache.jmeter.visualizers.backend.UserMetric;
 
 public interface TestStateMeasure {

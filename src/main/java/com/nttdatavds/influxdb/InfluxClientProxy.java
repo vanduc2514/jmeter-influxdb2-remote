@@ -1,4 +1,4 @@
-package com.nttdatavds.influxdb;
+package com.github.vanduc2514.influxdb;
 
 import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.InfluxDBClientFactory;

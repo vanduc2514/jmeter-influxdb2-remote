@@ -1,6 +1,6 @@
-package com.nttdatavds.measures.impl;
+package com.github.vanduc2514.measures.impl;
 
-import com.nttdatavds.influxdb.InfluxClientProxy;
+import com.github.vanduc2514.influxdb.InfluxClientProxy;
 
 public abstract class AbstractInfluxMeasure {
 

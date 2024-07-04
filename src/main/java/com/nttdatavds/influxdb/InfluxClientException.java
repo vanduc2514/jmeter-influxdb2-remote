@@ -1,4 +1,4 @@
-package com.nttdatavds.influxdb;
+package com.github.vanduc2514.influxdb;
 
 /**
  * Custom Exception when sending data to InfluxDB
